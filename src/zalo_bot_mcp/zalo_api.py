@@ -128,7 +128,12 @@ class _TokenRedactingFilter(logging.Filter):
 # miss every submodule. This package therefore takes the other route: it never
 # puts a URL in a log record at all (see _call, which logs the method name).
 # test_module_never_logs_a_url enforces that.
-_REDACTED_LOGGERS = ("httpx", "httpcore")
+#
+# httpcore is deliberately absent for the same child-logger reason: it logs on
+# httpcore.connection/http11/etc., which a filter on "httpcore" would never
+# see. Verified against a live server at DEBUG: httpcore does not log URLs, so
+# no filter is needed there.
+_REDACTED_LOGGERS = ("httpx",)
 
 
 class ZaloBotApi:
