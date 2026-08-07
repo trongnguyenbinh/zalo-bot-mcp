@@ -35,3 +35,7 @@ line-length = 100
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+# hatchling's editable install writes _editable_impl_*.pth, which Python 3.14
+# ignores (underscore-prefixed .pth files are skipped since 3.14) — put src on
+# the path directly so tests don't depend on the editable-install mechanism.
+pythonpath = ["src"]
