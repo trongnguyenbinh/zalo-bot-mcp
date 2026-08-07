@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+
+# Runtime state — holds bot token and the allowlist. Never commit.
+.env
+state/
+access.json
+*.pid
+
+# Design and planning docs stay local.
+docs/specs/
+docs/plans/
+docs/superpowers/
+
+# Spike/scratch work, not part of the package.
+spike/
