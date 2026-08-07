@@ -1,6 +1,7 @@
 """Thin async client for the Zalo Bot API.
 
-Knows nothing about MCP. Three calls only: getUpdates, sendMessage, getMe.
+Knows nothing about MCP. Four calls: getUpdates, sendMessage, getMe,
+getWebhookInfo.
 
 Zalo puts the bot token in the URL path (``/bot<TOKEN>/getUpdates``), so any
 error message or log line that includes a URL leaks the token. Every string
@@ -163,8 +164,19 @@ class ZaloBotApi:
         return text.replace(self._token, "<token>")
 
     async def _call(
-        self, method: str, payload: dict[str, Any], *, timeout: float | None = None
+        self,
+        method: str,
+        payload: dict[str, Any],
+        *,
+        timeout: float | None = None,
+        timeout_is_empty: bool = False,
     ) -> Any:
+        """timeout_is_empty: a long poll that ends with no messages is NOT an
+        error, Zalo answers it with HTTP 408 {"ok":false,"description":
+        "Request timeout"} (measured against a real bot). With this flag the
+        408 becomes a normal None result; without it 408 stays a client
+        error. Checked at both layers because the ok:false branch would
+        otherwise swallow it."""
         logger.debug("calling %s", method)
         try:
             resp = await self._client.post(f"/{method}", json=payload, timeout=timeout)
@@ -172,6 +184,8 @@ class ZaloBotApi:
             # from None: the httpx exception message contains the full URL
             # (token included) and must not surface in tracebacks.
             raise ZaloTransientError(self._redact(f"{method}: {exc}")) from None
+        if timeout_is_empty and resp.status_code == 408:
+            return None
         if resp.status_code == 429 or resp.status_code >= 500:
             raise ZaloTransientError(
                 self._redact(f"{method}: HTTP {resp.status_code}: {resp.text[:200]}")
@@ -186,13 +200,24 @@ class ZaloBotApi:
             raise ZaloTransientError(
                 self._redact(f"{method}: non-JSON response: {resp.text[:200]}")
             ) from None
+        if (
+            timeout_is_empty
+            and isinstance(data, dict)
+            and not data.get("ok")
+            and "timeout" in str(data.get("description", "")).lower()
+        ):
+            return None
         if not isinstance(data, dict) or not data.get("ok"):
             raise ZaloClientError(self._redact(f"{method}: API error: {data!r}"[:500]))
         return data.get("result")
 
     async def get_updates(self, timeout: int = 30) -> Any:
+        """Long poll for updates. Returns None when the window closed with no
+        messages, the NORMAL idle path, not an error."""
         # HTTP read timeout must outlast the long poll itself.
-        return await self._call("getUpdates", {"timeout": timeout}, timeout=timeout + 10)
+        return await self._call(
+            "getUpdates", {"timeout": timeout}, timeout=timeout + 10, timeout_is_empty=True
+        )
 
     async def send_message(
         self, chat_id: str, text: str, parse_mode: str | None = None
@@ -209,12 +234,22 @@ class ZaloBotApi:
     async def get_me(self) -> Any:
         return await self._call("getMe", {})
 
+    async def get_webhook_info(self) -> Any:
+        """Returns the webhook info dict when a webhook is set, or None when
+        none exists. A clean bot answers with HTTP 404 {"ok":false,
+        "description":"Not Found"} (measured, not documented), so any
+        client-class error here simply means "no webhook"."""
+        try:
+            return await self._call("getWebhookInfo", {})
+        except ZaloClientError:
+            return None
+
     async def aclose(self) -> None:
         await self._client.aclose()
         for name in _REDACTED_LOGGERS:
             logging.getLogger(name).removeFilter(self._log_filter)
 
-    async def __aenter__(self) -> ZaloBotApi:  # noqa: PYI034 — 3.10 has no typing.Self
+    async def __aenter__(self) -> ZaloBotApi:  # noqa: PYI034, 3.10 has no typing.Self
         return self
 
     async def __aexit__(self, *exc_info: object) -> None:

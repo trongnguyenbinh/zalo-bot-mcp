@@ -10,6 +10,7 @@ build/
 
 # Runtime state — holds bot token and the allowlist. Never commit.
 .env
+*.env
 state/
 access.json
 *.pid

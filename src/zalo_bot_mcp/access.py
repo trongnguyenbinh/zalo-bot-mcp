@@ -1,4 +1,4 @@
-"""Read/write access.json — the access-control state.
+"""Read/write access.json, the access-control state.
 
 The file is reloaded on every call, so operators can edit it while the server
 runs and changes take effect immediately. Expired pairing codes are pruned on
@@ -46,7 +46,7 @@ def _check_allow_list(entries: Any, where: str) -> None:
             raise AccessError(f"{where}: allowFrom entries must be strings, got {entry!r}")
         if any(ch in entry for ch in _WILDCARD_CHARS):
             raise AccessError(
-                f"{where}: wildcard {entry!r} in allowFrom — refusing to run. "
+                f"{where}: wildcard {entry!r} in allowFrom, refusing to run. "
                 "List explicit user ids only."
             )
 
@@ -107,7 +107,7 @@ class AccessStore:
         attempt cap or all pending slots are taken.
 
         A user re-requesting replaces their old code instead of taking a
-        second slot. Hitting the slot cap does not count as an attempt — the
+        second slot. Hitting the slot cap does not count as an attempt, the
         user never received a code.
         """
         cfg = self.load()
@@ -129,7 +129,7 @@ class AccessStore:
         """Operator-side approval: move the code's user into allowFrom.
         Returns the user id, or None if the code is unknown/expired.
 
-        Never call this from anything a Zalo message can influence — approval
+        Never call this from anything a Zalo message can influence, approval
         happens out of band, by the operator, full stop.
         """
         cfg = self.load()

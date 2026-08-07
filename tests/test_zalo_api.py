@@ -98,6 +98,63 @@ async def test_get_me():
     assert me["id"] == "bot-1"
 
 
+async def test_get_webhook_info_when_set():
+    # Verbatim shape from a real bot with a webhook attached.
+    def handler(request):
+        assert request.url.path == f"/bot{TOKEN}/getWebhookInfo"
+        return httpx.Response(
+            200,
+            json={
+                "ok": True,
+                "result": {"url": "https://example.test/hook", "updated_at": 1785647889461},
+                "error_code": 0,
+            },
+        )
+
+    async with make_api(handler) as api:
+        info = await api.get_webhook_info()
+    assert info["url"] == "https://example.test/hook"
+
+
+async def test_get_webhook_info_clean_bot_404_returns_none():
+    # Verbatim response from a real bot with NO webhook: HTTP 404, not
+    # ok:true-with-empty-url. Must mean "no webhook", not an error.
+    def handler(request):
+        return httpx.Response(
+            404, json={"ok": False, "description": "Not Found", "error_code": 404}
+        )
+
+    async with make_api(handler) as api:
+        assert await api.get_webhook_info() is None
+
+
+# --- empty long poll (the normal idle path) ----------------------------------
+
+EMPTY_POLL_BODY = {"ok": False, "description": "Request timeout", "error_code": 408}
+
+
+async def test_get_updates_408_means_no_messages_not_an_error():
+    # Verbatim response from a real bot when nobody wrote during the poll
+    # window. This is long polling's most common path — it must NOT raise.
+    async with make_api(lambda request: httpx.Response(408, json=EMPTY_POLL_BODY)) as api:
+        assert await api.get_updates() is None
+
+
+async def test_get_updates_ok_false_timeout_description_also_means_empty():
+    # Second layer: same body arriving with HTTP 200 must not fall into the
+    # ok:false → ZaloClientError branch.
+    async with make_api(lambda request: httpx.Response(200, json=EMPTY_POLL_BODY)) as api:
+        assert await api.get_updates() is None
+
+
+async def test_408_on_other_calls_still_raises():
+    # timeout_is_empty applies to getUpdates only; a 408 on sendMessage is
+    # still a client error.
+    async with make_api(lambda request: httpx.Response(408, json=EMPTY_POLL_BODY)) as api:
+        with pytest.raises(ZaloClientError):
+            await api.send_message("chat-1", "hi")
+
+
 async def test_send_message_rejects_empty_and_too_long():
     async with make_api(lambda request: ok_response({})) as api:
         with pytest.raises(ValueError):

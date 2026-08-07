@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "zalo": {
+      "command": ".venv/bin/zalo-bot-mcp"
+    }
+  }
+}

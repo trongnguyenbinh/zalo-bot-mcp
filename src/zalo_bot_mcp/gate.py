@@ -3,7 +3,7 @@ it may reach the Claude session; nothing else is allowed to forward messages.
 
 Decisions, not side effects: the gate never talks to the network. It returns
 what should happen (allow / drop / reply-with-pairing-code) and the caller
-does the sending. Unknown is always dropped silently — strangers learn
+does the sending. Unknown is always dropped silently, strangers learn
 nothing about whether the bot is alive.
 """
 
@@ -31,7 +31,7 @@ DROP = GateResult("drop")
 def _pairing_reply(code: str) -> str:
     return (
         f"Pairing code: {code} (expires in 1 hour). "
-        "Ask the bot operator to approve it — the bot itself cannot.\n"
+        "Ask the bot operator to approve it, the bot itself cannot.\n"
         f"Mã ghép nối: {code} (hết hạn sau 1 giờ). "
         "Nhờ người vận hành bot duyệt mã này."
     )
@@ -40,7 +40,7 @@ def _pairing_reply(code: str) -> str:
 def check(store: AccessStore, msg: InboundMessage) -> GateResult:
     """Decide what to do with one inbound message.
 
-    Raises AccessError if access.json is invalid (wildcards, bad policy) —
+    Raises AccessError if access.json is invalid (wildcards, bad policy):
     refusing to run beats running open.
     """
     if msg.is_bot:

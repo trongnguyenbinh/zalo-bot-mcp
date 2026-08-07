@@ -21,6 +21,7 @@ dev = [
 
 [project.scripts]
 zalo-bot-mcp = "zalo_bot_mcp.main:run"
+zalo-bot-mcp-admin = "zalo_bot_mcp.admin:main"
 
 [build-system]
 requires = ["hatchling"]
