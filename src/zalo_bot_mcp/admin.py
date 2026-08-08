@@ -16,7 +16,7 @@ import getpass
 import sys
 import time
 
-from .access import AccessStore
+from .access import DM_POLICIES, AccessError, AccessStore
 from .state import SeenChats, read_env_token, state_dir, write_env_token
 from .zalo_api import ZaloApiError, ZaloBotApi
 
@@ -79,6 +79,34 @@ def cmd_revoke(store: AccessStore, user_id: str) -> int:
     cfg["allowFrom"].remove(user_id)
     store.save(cfg)
     print(f"revoked: {user_id}")
+    return 0
+
+
+def cmd_policy(store: AccessStore, policy: str) -> int:
+    """Switch the DM policy.
+
+    Refuses to switch to allowlist while allowFrom is empty. That combination
+    is a locked door with the key inside: nobody gets through, and nobody can
+    ask for a pairing code either, so the only way back is editing the file by
+    hand. Approve yourself first, then lock the door.
+    """
+    cfg = store.load()
+    current = cfg["dmPolicy"]
+    if current == policy:
+        print(f"dmPolicy is already {policy}")
+        return 0
+    if policy == "allowlist" and not cfg["allowFrom"]:
+        print(
+            "refusing: allowFrom is empty, so allowlist would lock everyone out "
+            "including you, with no way to request a pairing code.\n"
+            "Approve yourself first (pair with the bot, then 'approve <code>', "
+            "or 'allow <user_id>' if you know your id), then run this again.",
+            file=sys.stderr,
+        )
+        return 1
+    cfg["dmPolicy"] = policy
+    store.save(cfg)
+    print(f"dmPolicy: {current} -> {policy}")
     return 0
 
 
@@ -181,6 +209,22 @@ def cmd_set_token() -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    try:
+        return _main(argv)
+    except AccessError as exc:
+        # A broken access.json is usually a hand-edit gone wrong, and this CLI
+        # is the tool you would reach for to fix it. Dying in a stack trace
+        # buries the one line that says which file and what is wrong with it.
+        print(f"{exc}", file=sys.stderr)
+        print(
+            f"\nEdit {state_dir() / 'access.json'} to fix it, or delete it to start "
+            "over from defaults (dmPolicy pairing, nobody allowed).",
+            file=sys.stderr,
+        )
+        return 1
+
+
+def _main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="zalo-bot-mcp-admin",
         description="Operator-only access control for zalo-bot-mcp."
@@ -188,6 +232,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("list", help="show policy, allowlist, groups, pending codes")
+    p = sub.add_parser("policy", help="set the DM policy")
+    p.add_argument("policy", choices=DM_POLICIES)
     p = sub.add_parser("approve", help="approve a pairing code")
     p.add_argument("code")
     p = sub.add_parser("allow", help="add a user id to allowFrom directly")
@@ -215,6 +261,8 @@ def main(argv: list[str] | None = None) -> int:
     store = _store()
     if args.command == "list":
         return cmd_list(store)
+    if args.command == "policy":
+        return cmd_policy(store, args.policy)
     if args.command == "approve":
         return cmd_approve(store, args.code)
     if args.command == "allow":

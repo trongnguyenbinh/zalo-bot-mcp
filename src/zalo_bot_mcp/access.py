@@ -23,7 +23,7 @@ MAX_PENDING_CODES = 3
 MAX_PAIR_ATTEMPTS = 2
 _WILDCARD_CHARS = ("*", "?")
 
-_DM_POLICIES = ("pairing", "allowlist", "disabled")
+DM_POLICIES = ("pairing", "allowlist", "disabled")
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "dmPolicy": "pairing",
@@ -54,8 +54,8 @@ def _check_allow_list(entries: Any, where: str) -> None:
 def validate(cfg: Any) -> None:
     if not isinstance(cfg, dict):
         raise AccessError("access.json root must be an object")
-    if cfg.get("dmPolicy", "pairing") not in _DM_POLICIES:
-        raise AccessError(f"dmPolicy must be one of {_DM_POLICIES}, got {cfg.get('dmPolicy')!r}")
+    if cfg.get("dmPolicy", "pairing") not in DM_POLICIES:
+        raise AccessError(f"dmPolicy must be one of {DM_POLICIES}, got {cfg.get('dmPolicy')!r}")
     _check_allow_list(cfg.get("allowFrom", []), "dm")
     groups = cfg.get("groups", {})
     if not isinstance(groups, dict):

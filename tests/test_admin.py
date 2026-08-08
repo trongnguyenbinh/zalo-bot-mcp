@@ -75,6 +75,48 @@ def test_revoke_unknown_user_fails(state, capsys):
     assert "not in allowFrom" in capsys.readouterr().err
 
 
+def test_corrupt_access_json_reports_cleanly(state, capsys):
+    (state / "access.json").write_text('{"dmPolicy": "pairing"}garbage')
+    assert main(["list"]) == 1
+    err = capsys.readouterr().err
+    assert "access.json" in err
+    assert "delete it to start over" in err
+
+
+def test_invalid_policy_in_file_reports_cleanly(state, capsys):
+    (state / "access.json").write_text('{"dmPolicy": "everyone"}')
+    assert main(["list"]) == 1
+    assert "dmPolicy must be one of" in capsys.readouterr().err
+
+
+def test_policy_switch_to_disabled(state, store, capsys):
+    assert main(["policy", "disabled"]) == 0
+    assert store.load()["dmPolicy"] == "disabled"
+    assert "pairing -> disabled" in capsys.readouterr().out
+
+
+def test_policy_allowlist_refused_while_allowfrom_empty(state, store, capsys):
+    assert main(["policy", "allowlist"]) == 1
+    assert store.load()["dmPolicy"] == "pairing"
+    assert "allowFrom is empty" in capsys.readouterr().err
+
+
+def test_policy_allowlist_allowed_once_someone_is_approved(state, store):
+    main(["allow", "u1"])
+    assert main(["policy", "allowlist"]) == 0
+    assert store.load()["dmPolicy"] == "allowlist"
+
+
+def test_policy_same_value_is_a_noop(state, store, capsys):
+    assert main(["policy", "pairing"]) == 0
+    assert "already pairing" in capsys.readouterr().out
+
+
+def test_policy_rejects_unknown_value(state):
+    with pytest.raises(SystemExit):
+        main(["policy", "everyone"])
+
+
 def test_approve_pairing_code(state, store, capsys):
     code = store.issue_pairing_code("u9")
     assert main(["approve", code]) == 0

@@ -2,8 +2,9 @@ English | [Tiếng Việt](getting-started.vi.md)
 
 # Getting started
 
-Three steps: create a Zalo bot, install this server, run Claude Code with the
-channel flag. The last one is the step everyone misses.
+Create a Zalo bot, then follow one of two install paths end to end. Each path
+covers everything through your first delivered message, including the channel
+flag — the step everyone misses.
 
 ## 1. Create your Zalo bot
 
@@ -24,54 +25,105 @@ Bots are created inside the Zalo app, through an official account called
 
 ![Basic plan quotas](assets/quota-basic.png)
 
-## 2. Install the server
+## 2. Install and run
 
-Both paths need [uv](https://docs.astral.sh/uv/) installed.
+There are two paths. **Pick one and follow it to the end** — each one below is
+complete, from install to your first delivered message. They differ in more
+than the install command, so do not mix steps between them.
 
-### Path A: Claude Code plugin (recommended)
+| | Path A: plugin | Path B: Python package |
+| --- | --- | --- |
+| Install from | Claude Code | terminal |
+| Access control via | `/zalo:*` skills | `zalo-bot-mcp-admin` CLI |
+| Needs `.mcp.json` | no | yes, one per project directory |
+| Channel entry | `plugin:zalo@zalo-bot-mcp` | `server:zalo` |
+| Works from any directory | yes | only where `.mcp.json` lives |
 
-Inside Claude Code:
+Both need [uv](https://docs.astral.sh/uv/) installed. Both store state in
+`~/.zalo-bot-mcp/`, so switching paths later keeps your token and allowlist.
+
+---
+
+### Path A: Claude Code plugin
+
+**A1. Install the plugin.** Inside Claude Code:
 
 ```
 /plugin marketplace add trongnguyenbinh/zalo-bot-mcp
 /plugin install zalo@zalo-bot-mcp
 ```
 
-This registers the MCP server and the eight `/zalo:*` skills. Then copy your
-bot token to the clipboard and run:
+This registers the MCP server and the `/zalo:*` skills.
+
+**A2. Install the token.** Copy the bot token to your clipboard, then:
 
 ```
 /zalo:set-token
 ```
 
-The token goes from the clipboard straight into `~/.zalo-bot-mcp/.env` with
-`0600` permissions. It never touches the conversation transcript or a shell
-argument, which is why the skill refuses to take the token as text.
+It goes from the clipboard straight into `~/.zalo-bot-mcp/.env` with `0600`
+permissions, never through the conversation transcript. That is why the skill
+refuses to take the token as text — do not paste it into the chat.
+
+**A3. Restart Claude Code with the channel flag.** In a terminal:
+
+```bash
+claude --dangerously-load-development-channels plugin:zalo@zalo-bot-mcp
+```
+
+Without this flag the server connects and the `reply` tool appears, but no
+Zalo message ever reaches the session. See
+[About that flag](#about-that-flag) for why it is named that.
+
+**A4. Send the first message.** Message your bot on Zalo. You get a pairing
+code back. Approve it in Claude Code:
+
+```
+/zalo:approve a1b2c3
+```
+
+Message again: it now arrives in the session.
+
+**A5. Lock it down.** While the policy is `pairing`, any stranger who finds
+your bot gets a pairing code. Once you are approved, close it:
+
+```
+/zalo:list
+/zalo:policy allowlist
+```
+
+**To uninstall:** `/plugin uninstall zalo@zalo-bot-mcp`. That leaves
+`~/.zalo-bot-mcp/` alone, so your token and allowlist survive. Delete that
+directory too if you want a clean slate.
+
+---
 
 ### Path B: Python package
+
+**B1. Install.** In a terminal:
 
 ```bash
 uv tool install zalo-bot-mcp
 ```
 
-Or from source, if you want an unreleased commit:
+Or from source, for an unreleased commit:
 
 ```bash
 uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp
 ```
 
-Check the command landed on your `PATH`:
+**B2. Check your `PATH`.**
 
 ```bash
 which zalo-bot-mcp
 ```
 
-Nothing printed means `~/.local/bin` is not on your `PATH`. Run `uv tool
-update-shell`, then open a new shell.
+Nothing printed means `~/.local/bin` is not on your `PATH`. Run
+`uv tool update-shell`, then open a new shell.
 
-Now register the server. Installing the package does not create this file, and
-nothing looks for it outside the directory you run Claude Code from, so create
-it yourself in the project directory:
+**B3. Create `.mcp.json`.** Installing the package does not create this file,
+and Claude Code only looks for it in the directory you start it from. Create
+it yourself, in the project directory you plan to work in:
 
 ```bash
 cat > .mcp.json <<'EOF'
@@ -79,63 +131,92 @@ cat > .mcp.json <<'EOF'
 EOF
 ```
 
-Then install the token. Run this on a terminal and it prompts with the input
-hidden, so paste the token and press Enter:
+**B4. Install the token.** On a terminal this prompts with the input hidden —
+paste the token and press Enter:
 
 ```bash
 zalo-bot-mcp-admin set-token
 ```
 
-Piping works too (macOS shown; on Linux use `xclip -o -selection clipboard` or
-`wl-paste` instead of `pbpaste`):
+Piping works too (macOS shown; on Linux use `xclip -o -selection clipboard`
+or `wl-paste` instead of `pbpaste`):
 
 ```bash
 pbpaste | zalo-bot-mcp-admin set-token
 ```
 
-Do not pass the token as a command-line argument. It would land in your shell
-history and in the process list. The CLI verifies the token against the live
-API (`getMe`) before writing anything, and prints the bot name on success.
-Alternatively, set the `ZALO_BOT_TOKEN` environment variable.
+Never pass the token as a command-line argument: it would land in your shell
+history and be visible in the process list. The CLI verifies the token
+against the live API (`getMe`) before writing anything and prints the bot name
+on success. Setting `ZALO_BOT_TOKEN` in the environment also works.
 
-## 3. Run Claude Code with the channel flag
-
-**This is the step the whole setup fails silently without.** MCP channels are
-an experimental Claude Code capability, and they are off by default. Without
-the flag the MCP server connects, the `reply` tool exists, but incoming Zalo
-messages never reach your session.
-
-The entry you pass depends on which path you installed. Path A registered a
-plugin; path B registered a plain MCP server, and the resolver looks them up
-in different places:
+**B5. Start Claude Code with the channel flag**, from the directory holding
+your `.mcp.json`:
 
 ```bash
-# Path A, installed as a plugin
-claude --dangerously-load-development-channels plugin:zalo@zalo-bot-mcp
-
-# Path B, declared in .mcp.json
 claude --dangerously-load-development-channels server:zalo
 ```
 
-Three details that matter:
+Without this flag the server connects and the `reply` tool appears, but no
+Zalo message ever reaches the session. See
+[About that flag](#about-that-flag) for why it is named that.
 
-- The prefix is required. A bare `zalo` will not resolve either way.
-- Path B only resolves from a directory whose `.mcp.json` declares the server.
-  Claude Code looks for `server:` names in the enterprise, user, project, and
-  local scopes; a plugin's server is not in any of them, which is why path A
-  needs the `plugin:` form.
-- **`--dangerously-load-development-channels`, not `--channels`.** The plain
-  `--channels` flag only accepts plugins on an approved-channels allowlist
-  that ships inside Claude Code, and it never accepts `server:` entries at
-  all. zalo is not on that allowlist, so the development flag is the only way
-  to run it today.
+**B6. Send the first message.** Message your bot on Zalo. You get a pairing
+code back. Approve it in the terminal:
 
-Claude Code shows a confirmation prompt about development channels, then a
-banner saying messages from the channel inject into the session. Message
-your bot on Zalo: the first DM gets a pairing code, and after you approve it
-(`/zalo:approve <code>`) your messages start arriving in the session.
+```bash
+zalo-bot-mcp-admin approve a1b2c3
+```
 
-## 4. Commands
+Message again: it now arrives in the session.
+
+**B7. Lock it down.** While the policy is `pairing`, any stranger who finds
+your bot gets a pairing code. Once you are approved, close it:
+
+```bash
+zalo-bot-mcp-admin list               # confirm your id is in allowFrom
+zalo-bot-mcp-admin policy allowlist
+```
+
+The command refuses to switch to `allowlist` while `allowFrom` is empty: that
+combination locks out everyone including you, with no way left to request a
+pairing code.
+
+**To uninstall:**
+
+```bash
+uv tool uninstall zalo-bot-mcp
+rm .mcp.json
+```
+
+That leaves `~/.zalo-bot-mcp/` alone, so your token and allowlist survive.
+Delete that directory too if you want a clean slate.
+
+---
+
+### About that flag
+
+MCP channels are an experimental Claude Code capability, off by default.
+
+The flag is `--dangerously-load-development-channels`, not `--channels`. The
+plain `--channels` flag only accepts plugins on an approved-channels allowlist
+that ships inside Claude Code, and it rejects `server:` entries outright. zalo
+is not on that allowlist, so the development flag is the only way to run it
+today.
+
+The prefix on the entry is required, and which prefix depends on your path.
+Claude Code resolves `server:` names against the enterprise, user, project,
+and local MCP scopes; a plugin registers its server outside all four, which is
+why path A needs `plugin:` instead. A bare `zalo` resolves under neither.
+
+Anthropic's guidance is that this flag is for developing your own channel
+locally, not for running channels downloaded off the internet. This one was
+downloaded off the internet. The mitigations are the gate and the rule that no
+Zalo message can change who is allowed through — both readable in
+[`src/zalo_bot_mcp/gate.py`](../src/zalo_bot_mcp/gate.py) and
+[SECURITY.md](../SECURITY.md).
+
+## 3. Commands
 
 ### `/zalo:*` skills (Claude Code)
 
@@ -143,6 +224,7 @@ your bot on Zalo: the first DM gets a pairing code, and after you approve it
 | --- | --- |
 | `/zalo:set-token` | Install the bot token from the clipboard. Example: copy token, then `/zalo:set-token` |
 | `/zalo:list` | Show access state: DM policy, allowlist, groups, pending codes |
+| `/zalo:policy` | Set the DM policy. Example: `/zalo:policy allowlist` |
 | `/zalo:pending-chats` | Show chats the gate has blocked, with ready-to-run grant commands |
 | `/zalo:approve` | Approve a pairing code. Example: `/zalo:approve a1b2c3` |
 | `/zalo:allow` | Add a user_id to the allowlist directly. Example: `/zalo:allow 1234abcd` |
@@ -160,6 +242,7 @@ The same operations without Claude Code. Same names, same behavior:
 ```bash
 zalo-bot-mcp-admin list                      # show access state
 zalo-bot-mcp-admin pending-chats             # blocked chats + suggested grants
+zalo-bot-mcp-admin policy allowlist          # set DM policy
 zalo-bot-mcp-admin approve a1b2c3            # approve a pairing code
 zalo-bot-mcp-admin allow 1234abcd            # allowlist a user directly
 zalo-bot-mcp-admin revoke 1234abcd           # remove a user
@@ -182,7 +265,21 @@ polling the same bot token: only one `getUpdates` consumer may exist per bot,
 otherwise they steal messages from each other. Find who runs the other one
 and stop it there; the newcomer refuses on purpose and never kills anything.
 
-**MCP connects but no messages arrive in the session.** Either the channel
-flag is missing (see step 3), or Claude Code was started in a directory where
-the `zalo` server is not declared. Both look identical: healthy server, dead
-channel.
+**MCP connects but no messages arrive in the session.** The commonest failure,
+and it looks identical in all four cases: healthy server, dead channel.
+
+- The channel flag is missing entirely (step A3 / B5).
+- You used `--channels` instead of `--dangerously-load-development-channels`.
+- You used the wrong entry for your path: `server:zalo` on a plugin install,
+  or `plugin:zalo@zalo-bot-mcp` on a package install.
+- Path B only: Claude Code was started outside the directory holding
+  `.mcp.json`.
+
+**`invalid choice: 'policy'`** means you are on a build older than the one
+that added the command. Upgrade (`uv tool upgrade zalo-bot-mcp`, or
+`/plugin update zalo@zalo-bot-mcp`).
+
+**`cannot read ~/.zalo-bot-mcp/access.json`** means the file is not valid
+JSON, almost always after a hand-edit. Fix the syntax, or delete the file to
+start over from defaults (`pairing`, nobody allowed) and re-approve yourself.
+Use `zalo-bot-mcp-admin policy` rather than editing the file by hand.
