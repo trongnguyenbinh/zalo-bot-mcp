@@ -1,3 +1,5 @@
+<p align="center">English | <a href="README.vi.md">Tiếng Việt</a></p>
+
 <h1 align="center">zalo-bot-mcp</h1>
 
 <p align="center">
@@ -78,34 +80,16 @@ of truth and this section as a summary that may be out of date:
 
 ## Install
 
-Both paths need [uv](https://docs.astral.sh/uv/) on the machine.
+Two ways in, both need [uv](https://docs.astral.sh/uv/): as a **Claude Code
+plugin** (`/plugin marketplace add trongnguyenbinh/zalo-bot-mcp`, then
+`/plugin install zalo@zalo-bot-mcp`), or as a **Python package** registered in
+your `.mcp.json`. Either way, Claude Code must then be started with the
+channel flag or messages never reach the session.
 
-### As a Claude Code plugin
-
-```
-/plugin marketplace add trongnguyenbinh/zalo-bot-mcp
-/plugin install zalo@zalo-bot-mcp
-```
-
-The plugin starts the server for you and adds the `/zalo:*` skills: `set-token`,
-`pending-chats`, `approve`, `allow`, `revoke`, `list`, `group-add`, `group-remove`.
-Start with `/zalo:set-token` to install your bot token from the clipboard.
-
-### As a Python package
-
-Not on PyPI yet. Until then, install from source:
-
-```bash
-uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp
-```
-
-Then register the server in your project's `.mcp.json`:
-
-```json
-{ "mcpServers": { "zalo": { "command": "zalo-bot-mcp" } } }
-```
-
-The `zalo-bot-mcp-admin` CLI manages tokens and access from the terminal.
+The full walkthrough, from creating the bot on Zalo to the first replied
+message, plus all `/zalo:*` skills and the `zalo-bot-mcp-admin` CLI, lives in
+**[docs/getting-started.md](docs/getting-started.md)**
+(bản tiếng Việt: [docs/getting-started.vi.md](docs/getting-started.vi.md)).
 
 ## Development
 

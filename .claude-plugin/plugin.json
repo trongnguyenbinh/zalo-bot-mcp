@@ -3,6 +3,9 @@
   "description": "Zalo channel for Claude Code. Messaging bridge with built-in access control: manage pairing, allowlists, and group grants via /zalo:* skills.",
   "version": "0.1.0",
   "author": { "name": "trongnguyenbinh" },
+  "homepage": "https://github.com/trongnguyenbinh/zalo-bot-mcp",
+  "repository": "https://github.com/trongnguyenbinh/zalo-bot-mcp",
+  "license": "MIT",
   "keywords": ["zalo", "messaging", "channel", "mcp"],
   "mcpServers": {
     "zalo": {
