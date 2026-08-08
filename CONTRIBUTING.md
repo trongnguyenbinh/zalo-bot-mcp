@@ -154,8 +154,9 @@ I maintain this alone, around a full-time job. So, honestly:
 
 ## Questions
 
-Questions that are not bug reports still go to
-[Issues](https://github.com/trongnguyenbinh/zalo-bot-mcp/issues) for now. Say up front that
-it is a question, and please check
-[docs/getting-started.md](docs/getting-started.md) first: setup problems are usually a
-missing channel flag or a bot that was never mentioned in the group.
+Questions, ideas, and "is this supposed to work like that?" go to
+[Discussions](https://github.com/trongnguyenbinh/zalo-bot-mcp/discussions). Issues are for
+things that are broken, so a question filed there just gets moved.
+
+Check [docs/getting-started.md](docs/getting-started.md) first: setup problems are almost
+always a missing channel flag or a bot that was never mentioned in the group.

@@ -1,9 +1,9 @@
 [English](getting-started.md) | Tiếng Việt
 
-# Bắt đầu từ đầu
+# Bắt đầu
 
-Ba bước: tạo bot Zalo, cài server này, chạy Claude Code với cờ channel. Bước
-cuối là bước ai cũng quên.
+Ba bước: tạo bot Zalo, cài server này, chạy Claude Code kèm cờ channel. Bước
+cuối mới là bước ai cũng quên.
 
 ## 1. Tạo bot Zalo
 
@@ -11,8 +11,8 @@ Bot được tạo ngay trong ứng dụng Zalo, qua tài khoản chính thức 
 **Zalo Bot Manager** (tài liệu: <https://bot.zapps.me/docs/create-bot/>):
 
 1. Trong ứng dụng Zalo, tìm OA **Zalo Bot Manager** và mở khung chat.
-2. Trong menu của khung chat, chọn **Tạo bot**. Ứng dụng nhỏ
-   **Zalo Bot Creator** sẽ mở ra.
+2. Trong menu của khung chat, chọn **Tạo bot**. Mini app **Zalo Bot Creator**
+   sẽ mở ra.
 3. Đặt tên cho bot. Tên bắt buộc bắt đầu bằng chữ `Bot`, ví dụ `Bot MyShop`.
 4. Bấm **Tạo Bot** để xác nhận. Token của bot được gửi về tài khoản Zalo của
    bạn dưới dạng tin nhắn. Hãy coi nó như mật khẩu: đừng dán vào chat, vào
@@ -42,9 +42,9 @@ vào clipboard rồi chạy:
 /zalo:set-token
 ```
 
-Token đi từ clipboard thẳng vào `~/.zalo-bot-mcp/.env` với quyền `0600`,
-không đi qua transcript hội thoại, không đi qua tham số lệnh. Skill từ chối
-nhận token dạng chữ cũng vì lý do đó.
+Token đi thẳng từ clipboard vào `~/.zalo-bot-mcp/.env`, quyền `0600`. Nó không
+nằm lại trong nội dung hội thoại, cũng không nằm trong tham số dòng lệnh. Đó
+là lý do skill này không nhận token gõ tay.
 
 ### Đường B: gói Python
 
@@ -67,7 +67,7 @@ Nạp token từ clipboard (lệnh macOS; trên Linux thay `pbpaste` bằng
 pbpaste | zalo-bot-mcp-admin set-token
 ```
 
-CLI gọi `getMe` kiểm tra token với API thật trước khi ghi, thành công thì in
+CLI gọi `getMe` hỏi API thật xem token có đúng không rồi mới ghi, đúng thì in
 tên bot ra. Cách khác: đặt biến môi trường `ZALO_BOT_TOKEN`.
 
 ## 3. Chạy Claude Code với cờ channel
@@ -85,7 +85,7 @@ Hai chi tiết quan trọng:
 - Bắt buộc có tiền tố `server:`. Viết
   `--dangerously-load-development-channels zalo` là không nhận.
 - Chạy trong thư mục có `.mcp.json` khai server `zalo` (đường B), hoặc đã cài
-  plugin (đường A). Bộ phân giải channel phải tìm thấy server đúng tên đó.
+  plugin (đường A). Claude Code phải tìm ra một server đúng tên đó thì mới nối được channel.
 
 Claude Code sẽ hỏi xác nhận về development channels, rồi hiện banner báo tin
 nhắn từ `server:zalo` sẽ vào thẳng phiên. Nhắn thử cho bot trên Zalo: tin DM
@@ -108,7 +108,7 @@ tin bắt đầu vào phiên.
 | `/zalo:group-remove` | Gỡ quyền một nhóm. Ví dụ: `/zalo:group-remove zgr-1a2b3c` |
 
 Mọi skill cấp quyền đều từ chối chạy khi yêu cầu đến từ một tin nhắn Zalo
-thay vì từ chính bạn: kịch bản đó chính là hình dáng của tấn công chèn lệnh.
+thay vì từ chính bạn. Đó đúng là cách một cú chèn lệnh sẽ diễn ra.
 
 ### CLI `zalo-bot-mcp-admin` (ngoài terminal)
 
@@ -135,8 +135,8 @@ webhook trong thông báo lỗi. Xoá webhook (`deleteWebhook` trong Bot API) r�
 chạy lại.
 
 **Khởi động báo "another poller (pid N) holds the lock".** Hai tiến trình
-đang cùng poll một token: mỗi bot chỉ được một người tiêu thụ `getUpdates`,
-không thì chúng giật tin của nhau. Tìm xem tiến trình kia chạy ở đâu và tắt
+đang cùng poll một token: mỗi bot chỉ được đúng một tiến trình gọi `getUpdates`,
+nếu không hai bên giật tin của nhau. Tìm xem tiến trình kia chạy ở đâu và tắt
 ở đó; tiến trình mới cố tình từ chối chứ không bao giờ tự giết ai.
 
 **MCP nối được mà tin không vào phiên.** Hoặc thiếu cờ channel (xem bước 3),

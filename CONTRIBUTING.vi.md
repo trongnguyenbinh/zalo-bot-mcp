@@ -150,8 +150,9 @@ Tôi duy trì dự án này một mình, xen giữa một công việc toàn th�
 
 ## Hỏi han
 
-Câu hỏi không phải báo lỗi thì hiện tại vẫn gửi vào
-[Issues](https://github.com/trongnguyenbinh/zalo-bot-mcp/issues). Nói rõ ngay từ đầu rằng đó
-là câu hỏi, và làm ơn xem
-[docs/getting-started.vi.md](docs/getting-started.vi.md) trước: lỗi lúc cài đặt thường là
-thiếu cờ channel, hoặc con bot chưa từng được nhắc tên trong nhóm.
+Hỏi gì, góp ý gì, hay thắc mắc kiểu "cái này chạy vậy là đúng hay sai" thì vào
+[Discussions](https://github.com/trongnguyenbinh/zalo-bot-mcp/discussions). Issues để dành
+cho thứ đang hỏng, hỏi ở đó thì cũng bị chuyển sang.
+
+Xem [docs/getting-started.vi.md](docs/getting-started.vi.md) trước đã: trục trặc lúc cài gần
+như lúc nào cũng là thiếu cờ channel, hoặc con bot chưa từng được nhắc tên trong nhóm.
