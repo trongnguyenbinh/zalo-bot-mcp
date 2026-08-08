@@ -1,6 +1,6 @@
 [project]
 name = "zalo-bot-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP channel server for the Zalo Bot API. Bridges Zalo messages into an MCP client session."
 readme = "README.md"
 requires-python = ">=3.10"
