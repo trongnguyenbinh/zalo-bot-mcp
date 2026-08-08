@@ -58,21 +58,42 @@ Hoặc cài từ source, nếu muốn lấy commit chưa release:
 uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp
 ```
 
-Khai báo server trong `.mcp.json` của thư mục dự án:
+Kiểm tra lệnh đã vào `PATH` chưa:
 
-```json
-{ "mcpServers": { "zalo": { "command": "zalo-bot-mcp" } } }
+```bash
+which zalo-bot-mcp
 ```
 
-Nạp token từ clipboard (lệnh macOS; trên Linux thay `pbpaste` bằng
+Không in ra gì tức là `~/.local/bin` chưa có trong `PATH`. Chạy `uv tool
+update-shell` rồi mở shell mới.
+
+Tiếp theo là khai báo server. Lệnh cài KHÔNG tạo file này, và Claude Code chỉ
+tìm nó trong đúng thư mục bạn chạy lệnh, nên bạn tự tạo trong thư mục dự án:
+
+```bash
+cat > .mcp.json <<'EOF'
+{ "mcpServers": { "zalo": { "command": "zalo-bot-mcp" } } }
+EOF
+```
+
+Rồi nạp token. Chạy trên terminal thì lệnh hiện prompt và ẩn ký tự nhập, bạn
+paste token vào rồi bấm Enter:
+
+```bash
+zalo-bot-mcp-admin set-token
+```
+
+Pipe cũng được (lệnh macOS; trên Linux thay `pbpaste` bằng
 `xclip -o -selection clipboard` hoặc `wl-paste`):
 
 ```bash
 pbpaste | zalo-bot-mcp-admin set-token
 ```
 
-CLI gọi `getMe` hỏi API thật xem token có đúng không rồi mới ghi, đúng thì in
-tên bot ra. Cách khác: đặt biến môi trường `ZALO_BOT_TOKEN`.
+Đừng truyền token làm tham số dòng lệnh. Nó sẽ nằm lại trong shell history và
+hiện trong danh sách process. CLI gọi `getMe` hỏi API thật xem token đúng
+không rồi mới ghi, đúng thì in tên bot ra. Cách khác: đặt biến môi trường
+`ZALO_BOT_TOKEN`.
 
 ## 3. Chạy Claude Code với flag channel
 

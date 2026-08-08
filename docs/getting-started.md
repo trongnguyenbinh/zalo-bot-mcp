@@ -60,22 +60,43 @@ Or from source, if you want an unreleased commit:
 uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp
 ```
 
-Register the server in your project's `.mcp.json`:
+Check the command landed on your `PATH`:
 
-```json
-{ "mcpServers": { "zalo": { "command": "zalo-bot-mcp" } } }
+```bash
+which zalo-bot-mcp
 ```
 
-Install the token from the clipboard (macOS shown; on Linux use `xclip -o
--selection clipboard` or `wl-paste` instead of `pbpaste`):
+Nothing printed means `~/.local/bin` is not on your `PATH`. Run `uv tool
+update-shell`, then open a new shell.
+
+Now register the server. Installing the package does not create this file, and
+nothing looks for it outside the directory you run Claude Code from, so create
+it yourself in the project directory:
+
+```bash
+cat > .mcp.json <<'EOF'
+{ "mcpServers": { "zalo": { "command": "zalo-bot-mcp" } } }
+EOF
+```
+
+Then install the token. Run this on a terminal and it prompts with the input
+hidden, so paste the token and press Enter:
+
+```bash
+zalo-bot-mcp-admin set-token
+```
+
+Piping works too (macOS shown; on Linux use `xclip -o -selection clipboard` or
+`wl-paste` instead of `pbpaste`):
 
 ```bash
 pbpaste | zalo-bot-mcp-admin set-token
 ```
 
-The CLI verifies the token against the live API (`getMe`) before writing
-anything, and prints the bot name on success. Alternatively, set the
-`ZALO_BOT_TOKEN` environment variable.
+Do not pass the token as a command-line argument. It would land in your shell
+history and in the process list. The CLI verifies the token against the live
+API (`getMe`) before writing anything, and prints the bot name on success.
+Alternatively, set the `ZALO_BOT_TOKEN` environment variable.
 
 ## 3. Run Claude Code with the channel flag
 
