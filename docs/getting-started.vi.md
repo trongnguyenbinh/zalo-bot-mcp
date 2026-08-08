@@ -212,7 +212,57 @@ rủi ro là gate, và quy tắc không tin nhắn Zalo nào sửa được danh
 [`src/zalo_bot_mcp/gate.py`](../src/zalo_bot_mcp/gate.py) và
 [SECURITY.md](../SECURITY.md).
 
-## 3. Danh sách lệnh
+## 3. Cập nhật lên bản mới
+
+Đường nào cũng phải restart ở bước cuối. Server chỉ khởi động một lần lúc mở
+session, nên code mới nằm trên đĩa không có tác dụng gì cho tới khi tiến trình
+được thay.
+
+### Đường A: plugin
+
+```bash
+claude plugin marketplace update zalo-bot-mcp
+```
+
+Lệnh này kéo commit mới nhất về bản clone marketplace, rồi giải ra một thư mục
+cache đặt tên theo version:
+`~/.claude/plugins/cache/zalo-bot-mcp/zalo/<version>/`.
+Xong thì thoát session Claude Code và mở lại kèm flag channel.
+
+Kiểm bản mới đã vào chưa: gõ `/zalo:` rồi đối chiếu danh sách skill với bảng
+bên dưới. Skill nào mới được thêm ở bản vừa cài mà xuất hiện thì chắc chắn
+update đã ăn.
+
+Hai điều nên biết trước khi báo lỗi:
+
+- **`/plugin update` không phải là lệnh.** `/plugin` mở màn hình quản lý
+  plugin, phần gõ thêm phía sau bị bỏ qua. Dùng CLI `claude plugin ...` ở trên,
+  chạy từ shell bình thường.
+- **Cache plugin đánh theo version trong `plugin.json`.** Hai bản build cùng
+  số version thì dùng chung một thư mục cache. Nên một bản phát hành có sửa
+  code mà quên bump version sẽ để bạn nằm lại ở cây cũ, không dấu hiệu gì.
+  Cài từ fork hoặc từ nhánh riêng thì nhớ bump version bên đó.
+
+### Đường B: gói Python
+
+```bash
+uv tool upgrade zalo-bot-mcp
+```
+
+Rồi restart session Claude Code. Kiểm xem thực tế nhận được gì:
+
+```bash
+zalo-bot-mcp-admin --help
+```
+
+Lệnh nào có trong tài liệu này mà không thấy trong output đó tức là chưa lên
+bản mới, thường do lúc trước cài từ git URL chứ không phải từ PyPI. Cài lại
+bằng `uv tool install --force zalo-bot-mcp`.
+
+Cả hai đường đều không đụng tới `~/.zalo-bot-mcp/`. Token, allowlist và quyền
+nhóm giữ nguyên qua cả nâng cấp, hạ cấp lẫn gỡ cài đặt.
+
+## 4. Danh sách lệnh
 
 ### Skill `/zalo:*` (trong Claude Code)
 

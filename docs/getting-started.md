@@ -4,7 +4,7 @@ English | [Tiếng Việt](getting-started.vi.md)
 
 Create a Zalo bot, then follow one of two install paths end to end. Each path
 covers everything through your first delivered message, including the channel
-flag — the step everyone misses.
+flag, the step everyone misses.
 
 ## 1. Create your Zalo bot
 
@@ -27,7 +27,7 @@ Bots are created inside the Zalo app, through an official account called
 
 ## 2. Install and run
 
-There are two paths. **Pick one and follow it to the end** — each one below is
+There are two paths. **Pick one and follow it to the end.** Each one below is
 complete, from install to your first delivered message. They differ in more
 than the install command, so do not mix steps between them.
 
@@ -63,7 +63,7 @@ This registers the MCP server and the `/zalo:*` skills.
 
 It goes from the clipboard straight into `~/.zalo-bot-mcp/.env` with `0600`
 permissions, never through the conversation transcript. That is why the skill
-refuses to take the token as text — do not paste it into the chat.
+refuses to take the token as text. Do not paste it into the chat.
 
 **A3. Restart Claude Code with the channel flag.** In a terminal:
 
@@ -131,7 +131,7 @@ cat > .mcp.json <<'EOF'
 EOF
 ```
 
-**B4. Install the token.** On a terminal this prompts with the input hidden —
+**B4. Install the token.** On a terminal this prompts with the input hidden,
 paste the token and press Enter:
 
 ```bash
@@ -212,11 +212,61 @@ why path A needs `plugin:` instead. A bare `zalo` resolves under neither.
 Anthropic's guidance is that this flag is for developing your own channel
 locally, not for running channels downloaded off the internet. This one was
 downloaded off the internet. The mitigations are the gate and the rule that no
-Zalo message can change who is allowed through — both readable in
+Zalo message can change who is allowed through. Both are readable in
 [`src/zalo_bot_mcp/gate.py`](../src/zalo_bot_mcp/gate.py) and
 [SECURITY.md](../SECURITY.md).
 
-## 3. Commands
+## 3. Upgrading
+
+Both paths need a restart at the end. The server is started once when your
+session launches, so a new version on disk changes nothing until the process
+is replaced.
+
+### Path A: plugin
+
+```bash
+claude plugin marketplace update zalo-bot-mcp
+```
+
+This pulls the newest commit into the marketplace clone and unpacks it into a
+version-keyed cache directory, `~/.claude/plugins/cache/zalo-bot-mcp/zalo/<version>/`.
+Then exit your Claude Code session and start it again with the channel flag.
+
+Confirm the new version is live by typing `/zalo:` and checking the skill list
+against the table below. A skill added in the release you just installed is
+the cheapest proof that the update took.
+
+Two things worth knowing before you file a bug:
+
+- **`/plugin update` is not a command.** `/plugin` opens the plugin browser,
+  and a subcommand after it is ignored. Use the `claude plugin ...` CLI above,
+  from a normal shell.
+- **The plugin cache is keyed by the version in `plugin.json`.** Two builds
+  sharing a version number share a cache directory, so a release that changes
+  code without bumping the version can leave you on the old tree with no
+  visible sign. If you are installing from a fork or a branch, bump the
+  version there too.
+
+### Path B: Python package
+
+```bash
+uv tool upgrade zalo-bot-mcp
+```
+
+Then restart the Claude Code session. Check what you actually got with:
+
+```bash
+zalo-bot-mcp-admin --help
+```
+
+A command listed here but missing from that output means the upgrade did not
+take, usually because the tool was installed from a git URL rather than PyPI.
+Reinstall with `uv tool install --force zalo-bot-mcp`.
+
+Neither path touches `~/.zalo-bot-mcp/`. Your token, allowlist, and group
+grants survive upgrades, downgrades, and uninstalls.
+
+## 4. Commands
 
 ### `/zalo:*` skills (Claude Code)
 
