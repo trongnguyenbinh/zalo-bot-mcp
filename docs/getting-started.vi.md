@@ -2,7 +2,7 @@
 
 # Bắt đầu
 
-Ba bước: tạo bot Zalo, cài server này, chạy Claude Code kèm cờ channel. Bước
+Ba bước: tạo bot Zalo, cài server này, chạy Claude Code kèm flag channel. Bước
 cuối mới là bước ai cũng quên.
 
 ## 1. Tạo bot Zalo
@@ -70,11 +70,11 @@ pbpaste | zalo-bot-mcp-admin set-token
 CLI gọi `getMe` hỏi API thật xem token có đúng không rồi mới ghi, đúng thì in
 tên bot ra. Cách khác: đặt biến môi trường `ZALO_BOT_TOKEN`.
 
-## 3. Chạy Claude Code với cờ channel
+## 3. Chạy Claude Code với flag channel
 
 **Thiếu bước này thì mọi thứ chết im lặng.** MCP channel là tính năng thử
-nghiệm của Claude Code, mặc định tắt. Không có cờ thì MCP server vẫn nối
-được, tool `reply` vẫn có, nhưng tin nhắn Zalo không bao giờ vào phiên.
+nghiệm của Claude Code, mặc định tắt. Không có flag thì MCP server vẫn kết
+nối được, tool `reply` vẫn có, nhưng tin nhắn Zalo không bao giờ vào session.
 
 ```bash
 claude --dangerously-load-development-channels server:zalo
@@ -82,15 +82,15 @@ claude --dangerously-load-development-channels server:zalo
 
 Hai chi tiết quan trọng:
 
-- Bắt buộc có tiền tố `server:`. Viết
+- Bắt buộc có prefix `server:`. Viết
   `--dangerously-load-development-channels zalo` là không nhận.
 - Chạy trong thư mục có `.mcp.json` khai server `zalo` (đường B), hoặc đã cài
   plugin (đường A). Claude Code phải tìm ra một server đúng tên đó thì mới nối được channel.
 
 Claude Code sẽ hỏi xác nhận về development channels, rồi hiện banner báo tin
-nhắn từ `server:zalo` sẽ vào thẳng phiên. Nhắn thử cho bot trên Zalo: tin DM
+nhắn từ `server:zalo` sẽ vào thẳng session. Nhắn thử cho bot trên Zalo: tin DM
 đầu tiên nhận được mã pairing, bạn duyệt mã (`/zalo:approve <mã>`) xong thì
-tin bắt đầu vào phiên.
+tin bắt đầu vào session.
 
 ## 4. Danh sách lệnh
 
@@ -99,7 +99,7 @@ tin bắt đầu vào phiên.
 | Skill | Công dụng |
 | --- | --- |
 | `/zalo:set-token` | Nạp token bot từ clipboard. Ví dụ: copy token xong gõ `/zalo:set-token` |
-| `/zalo:list` | Xem trạng thái access: chính sách DM, allowlist, nhóm, mã đang chờ |
+| `/zalo:list` | Xem trạng thái access: policy DM, allowlist, nhóm, mã đang chờ |
 | `/zalo:pending-chats` | Xem các chat bị gate chặn, kèm sẵn lệnh cấp quyền |
 | `/zalo:approve` | Duyệt mã pairing. Ví dụ: `/zalo:approve a1b2c3` |
 | `/zalo:allow` | Thêm thẳng một user_id vào allowlist. Ví dụ: `/zalo:allow 1234abcd` |
@@ -125,7 +125,7 @@ zalo-bot-mcp-admin group-remove zgr-1a2b3c   # gỡ quyền nhóm
 pbpaste | zalo-bot-mcp-admin set-token       # nạp token từ clipboard
 ```
 
-Trạng thái nằm ở `~/.zalo-bot-mcp/` (đổi bằng biến `ZALO_MCP_STATE_DIR`).
+State nằm ở `~/.zalo-bot-mcp/` (đổi bằng biến `ZALO_MCP_STATE_DIR`).
 
 ## Xử lý sự cố
 
@@ -139,6 +139,6 @@ chạy lại.
 nếu không hai bên giật tin của nhau. Tìm xem tiến trình kia chạy ở đâu và tắt
 ở đó; tiến trình mới cố tình từ chối chứ không bao giờ tự giết ai.
 
-**MCP nối được mà tin không vào phiên.** Hoặc thiếu cờ channel (xem bước 3),
+**MCP kết nối được mà tin không vào session.** Hoặc thiếu flag channel (xem bước 3),
 hoặc Claude Code được mở ở thư mục không khai server `zalo`. Hai lỗi nhìn
 giống hệt nhau: server khỏe, channel chết.

@@ -8,8 +8,8 @@ bot.
 
 ## Trước khi bắt đầu
 
-- Đóng góp được cấp phép theo [giấy phép MIT](LICENSE), giống phần còn lại của dự án. Không
-  có CLA, không bắt ký sign-off.
+- Đóng góp được cấp phép theo [giấy phép MIT](LICENSE), giống phần còn lại của dự án. Không có
+  CLA, không bắt ký sign-off.
 - **Phát hiện lỗ hổng bảo mật? Đừng mở issue, đừng mở PR.** Hãy báo riêng tư, xem
   [SECURITY.md](SECURITY.md). Một PR công khai vá lỗi vượt gate cũng công bố luôn cách vượt
   gate, và mọi bản đang chạy sẽ phơi ra cho tới khi người ta kịp nâng cấp.
@@ -39,16 +39,16 @@ pytest -q
 ```
 
 Bộ test có 144 bài, chạy chưa tới một giây. Nó không cần mạng, không cần token, không cần tài
-khoản Zalo: phần gọi API được test bằng đối tượng giả. Nếu test của bạn cần một bot thật mới
+khoản Zalo: phần gọi API được test bằng mock. Nếu test của bạn cần một bot thật mới
 chạy được thì nó thuộc về phần ghi chú thủ công trong mô tả PR, không thuộc về `tests/`.
 
 CI chạy đúng hai lệnh trên, với Python 3.10 và 3.14
 (xem [`.github/workflows/ci.yml`](.github/workflows/ci.yml)). Xanh ở máy bạn là xanh trên CI.
 
-Một điểm cần biết: **`ruff format` chưa được bắt buộc.** Ba file hiện có chưa đúng định dạng,
+Một điểm cần biết: **`ruff format` chưa được bắt buộc.** Ba file hiện tại chưa đúng format,
 và định dạng lại chúng bên trong một PR không liên quan sẽ biến một thay đổi năm dòng thành
-một diff không ai review nổi. Hãy viết theo phong cách của đoạn mã xung quanh, chạy
-`ruff check .`, và đừng đụng vào `ruff format` trừ khi PR của bạn đúng là về định dạng.
+một diff không ai review nổi. Hãy viết theo style của đoạn code xung quanh, chạy
+`ruff check .`, và đừng đụng vào `ruff format` trừ khi PR của bạn đúng là về format.
 
 ## Quy trình
 
@@ -57,7 +57,7 @@ một diff không ai review nổi. Hãy viết theo phong cách của đoạn m�
    tôi trước đã. Tôi thà nói "không đi đường này" trong một comment còn hơn nói khi bạn đã bỏ
    cả cuối tuần vào một nhánh.
 2. **Tách nhánh từ `main`.** Tên ngắn gọn dễ hiểu, kiểu `fix/dedupe-on-restart`. Bạn sẽ làm
-   trên bản fork; nhánh `main` ở đây chặn đẩy thẳng và chặn force-push.
+   trên fork của mình; nhánh `main` ở đây chặn đẩy thẳng và chặn force-push.
 3. **Mỗi PR một thay đổi logic.** Hai chỗ sửa không liên quan là hai PR. Không phải làm khó,
    mà vì tôi review vào buổi tối, và một diff gọn là khác biệt giữa merge tối nay và merge sau
    ba tuần.
@@ -71,7 +71,7 @@ một diff không ai review nổi. Hãy viết theo phong cách của đoạn m�
 ## Thay đổi chạm vào gate
 
 `src/zalo_bot_mcp/gate.py` và `src/zalo_bot_mcp/access.py` quyết định tin nhắn của ai được
-vào tới một phiên có quyền đọc file và chạy lệnh trên máy người khác. Sai ở đó không phải là
+vào tới một session có quyền đọc file và chạy lệnh trên máy người khác. Sai ở đó không phải là
 một cái bug, mà là một cánh cửa không khoá trên mọi bản cài.
 
 Nếu PR của bạn động vào hai file đó, hoặc động vào định dạng file cấu hình truy cập:
@@ -85,7 +85,7 @@ Nếu PR của bạn động vào hai file đó, hoặc động vào định d�
   bẻ. Không có gì cá nhân ở đây, đây là phần mã mà sai thì người trả giá là những người không
   có mặt trong cuộc trao đổi này.
 
-Mô hình mối đe doạ, và ranh giới giữa "lỗ hổng" với "thiết kế đúng như vậy", được viết rõ
+Threat model, và ranh giới giữa "lỗ hổng" với "thiết kế đúng như vậy", được viết rõ
 trong [SECURITY.md](SECURITY.md#what-counts). Đọc nó trước khi đề xuất thay đổi ở đây.
 
 ## Commit và tiêu đề PR
@@ -99,33 +99,33 @@ docs: document the group mention requirement
 
 Các type đang dùng: `feat`, `fix`, `docs`, `test`, `refactor`, `ci`, `chore`.
 
-**Đây là quy ước, không phải một cái kiểm tra tự động.** Không có gì trong CI đọc commit
-message của bạn, cũng không có công cụ nào tính số phiên bản từ đó, nên sẽ không có PR nào bị
+**Đây là quy ước, không phải một cái check tự động.** Không có gì trong CI đọc commit
+message của bạn, cũng không có tool nào tính số version từ đó, nên sẽ không có PR nào bị
 từ chối vì một dòng tiêu đề. Làm theo vì nó giúp lịch sử commit dễ đọc.
 
-**Tiêu đề PR thì khác, và có máy đọc thật.** Ghi chú phát hành trên GitHub được sinh ra từ
-tiêu đề các PR đã merge, nên tiêu đề của bạn sẽ nằm nguyên văn trong ghi chú phát hành công
+**Tiêu đề PR thì khác, và có máy đọc thật.** Release notes trên GitHub được sinh ra từ
+tiêu đề các PR đã merge, nên tiêu đề của bạn sẽ nằm nguyên văn trong release notes công
 khai. Hãy viết nó như dòng changelog mà chính bạn muốn đọc: cái gì đã đổi, không phải bạn đã
 làm gì.
 
 ## Phạm vi
 
-Server này làm đúng một việc: nối Zalo Bot API vào một phiên MCP, có một cái gate đứng chắn
+Server này làm đúng một việc: nối Zalo Bot API vào một MCP session, có một cái gate đứng chắn
 phía trước.
 
 Ngoài phạm vi, và tôi sẽ đóng kèm một link về đây:
 
 - **Nền tảng chat khác.** Telegram, Discord, Messenger. Đây là server cho Zalo. Chính lớp
-  trừu tượng làm nó chạy được đa nền tảng là lớp trừu tượng khiến cái gate khó soát.
+  abstraction để chạy được đa nền tảng là thứ làm cái gate khó soát.
 - **Chế độ webhook.** Long polling là thiết kế, không phải giới hạn cần đi vòng: không cần
-  URL công khai, không cần tunnel, không cần mở cổng vào, chạy được trên laptop sau NAT.
+  URL public, không cần tunnel, không cần mở cổng vào, chạy được trên laptop sau NAT.
 - **Mọi thứ cho phép một tin nhắn Zalo đổi được cấu hình truy cập.** Không phải tính năng còn
   thiếu. Quyền được cấp từ terminal của người vận hành và không từ đâu khác, và đó là thứ chịu
   lực của cả thiết kế.
-- **Hosting, đa người thuê, bảng điều khiển web, hệ thống plugin.**
+- **Hosting, multi-tenant, web dashboard, plugin system.**
 
 Những hành vi do chính API của Zalo áp đặt (tin nhắn tối đa 2000 ký tự, nhóm chỉ nhận khi
-được nhắc tên, không sửa được tin đã gửi, không có reaction, không có con trỏ offset) thì một
+được mention, không sửa được tin đã gửi, không có reaction, không có offset cursor) thì một
 PR ở đây không sửa được. Danh sách hiện tại nằm trong README.
 
 Đóng một PR không có gì cá nhân. Giấy phép MIT nghĩa là fork là một câu trả lời hoàn toàn hợp
@@ -145,8 +145,8 @@ Tôi duy trì dự án này một mình, xen giữa một công việc toàn th�
   rồi bị đóng, và cái đó phí thời gian của bạn nhiều hơn của tôi.
 - **PR im hơn hai tuần thì cứ nhắc.** Tôi không phớt lờ bạn đâu, nó trôi khỏi trang thôi. Nhắc
   một câu là điều nên làm, không phải bất lịch sự.
-- **Đây là bản 0.x.** Tên tool, hình dạng file cấu hình và cờ CLI đều có thể đổi giữa các bản
-  minor. Nếu bạn xây thứ gì lên trên nó, hãy ghim phiên bản.
+- **Đây là bản 0.x.** Tên tool, hình dạng file config và flag CLI đều có thể đổi giữa các bản
+  minor. Nếu bạn xây thứ gì lên trên nó, hãy pin version lại.
 
 ## Hỏi han
 

@@ -13,15 +13,16 @@
 </p>
 
 MCP channel server cho [Zalo Bot API](https://bot.zapps.me/docs/). Ai nhắn cho bot Zalo của
-bạn thì tin đó vào thẳng phiên MCP đang chạy, và phiên trả lời ngược lại bằng một tool call.
+bạn thì tin đó vào thẳng session MCP đang chạy, và session trả lời ngược lại bằng một tool
+call.
 
-> **Dự án còn non.** Server chạy được, đã dùng thật với bot thật, nhưng chưa lên PyPI. MCP
+> **Dự án còn mới.** Server chạy được, đã dùng thật với bot thật, nhưng chưa lên PyPI. MCP
 > channel mà nó bám vào cũng vẫn là tính năng thử nghiệm của Claude Code.
 
 ## Nó chạy thế nào
 
 ```
-Nhóm Zalo  ──mention──▶  getUpdates  ──▶  gate  ──▶  phiên MCP
+Nhóm Zalo  ──mention──▶  getUpdates  ──▶  gate  ──▶  MCP session
                                            │             │
                                      (không được phép)  tool reply
                                            │             │
@@ -29,7 +30,7 @@ Nhóm Zalo  ──mention──▶  getUpdates  ──▶  gate  ──▶  phi�
                                                     sendMessage
 ```
 
-Server hỏi Zalo bằng `getUpdates`, tức là nó chủ động gọi ra. Không cần URL công khai, không
+Server hỏi Zalo bằng `getUpdates`, tức là nó chủ động gọi ra. Không cần URL public, không
 cần webhook, không cần tunnel. Cắm trên laptop sau NAT vẫn chạy.
 
 Tin nào đến cũng phải qua gate trước. Trong hệ thống này không có thứ gì thấy tin trước gate.
@@ -44,14 +45,14 @@ Tin nào đến cũng phải qua gate trước. Trong hệ thống này không c
 | `allowlist` | Không gì cả. Tin bị bỏ, bot im |
 | `disabled` | Không gì cả. Mọi tin nhắn riêng đều bị bỏ |
 
-**Nhóm** phải được cấp quyền theo chat_id. Kéo bot vào nhóm không có nghĩa là nhóm đó dùng
+**Nhóm** phải được cấp quyền theo `chat_id`. Kéo bot vào nhóm không có nghĩa là nhóm đó dùng
 được. Bạn còn giới hạn được ai trong nhóm mới gọi bot.
 
 Hai điều code không cho phá:
 
 1. Không tin nhắn Zalo nào sửa được cấu hình truy cập. Một tin xin vào allowlist trông y hệt
    một cú chèn lệnh, nên việc cấp quyền luôn nằm ngoài kênh chat.
-2. Allowlist mà có ký tự đại diện thì server không chịu khởi động. Lúc thử nghiệm ai cũng
+2. Allowlist mà có wildcard thì server không chịu khởi động. Lúc thử nghiệm ai cũng
    nới allowlist ra cho nhanh, rồi quên thu lại.
 
 Nằm trong allowlist chỉ có nghĩa là bạn nhắn được cho bot. Nó không kèm theo quyền hành gì
@@ -67,7 +68,7 @@ khác.
   nó mới nhận được. Bot không ngồi hóng cả cuộc trò chuyện được.
 - **Một tin tối đa 2000 ký tự.** Trả lời dài hơn thì bị cắt thành nhiều tin.
 - **Không có offset.** `getUpdates` chỉ nhận `timeout`, nên muốn khỏi xử lý trùng thì phải
-  tự nhớ `message_id`, không có con trỏ nào để dời.
+  tự nhớ `message_id`, không có cursor nào để dời.
 - **Gửi rồi không sửa được.** Việc chạy lâu thì tiến độ phải báo bằng tin mới.
 - **Không có reaction.** API không có endpoint nào để thả cảm xúc. Bù lại có trạng thái đang
   soạn tin (`sendChatAction`) và sticker.
@@ -80,8 +81,8 @@ khác.
 Hai đường, đường nào cũng cần [uv](https://docs.astral.sh/uv/). Cài dạng **plugin Claude
 Code** (`/plugin marketplace add trongnguyenbinh/zalo-bot-mcp`, rồi `/plugin install
 zalo@zalo-bot-mcp`), hoặc cài dạng **gói Python** rồi khai trong `.mcp.json`. Cài xong kiểu
-nào cũng phải chạy Claude Code kèm cờ channel, thiếu cờ đó thì tin nhắn không bao giờ vào
-tới phiên.
+nào cũng phải chạy Claude Code kèm flag channel, thiếu flag đó thì tin nhắn không bao giờ
+vào tới session.
 
 Hướng dẫn đầy đủ, từ lúc tạo bot cho tới tin trả lời đầu tiên, kèm toàn bộ skill `/zalo:*`
 và CLI `zalo-bot-mcp-admin`, nằm ở **[docs/getting-started.vi.md](docs/getting-started.vi.md)**
