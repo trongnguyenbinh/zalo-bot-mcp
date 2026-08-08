@@ -120,6 +120,19 @@ pytest
 Runtime dependencies are `httpx` and `mcp`. Nothing else. The Zalo endpoints are called
 directly, so the whole API surface stays readable in one file.
 
+## Not affiliated with Zalo
+
+This is a personal, unofficial project. It is not built, endorsed, reviewed, or supported by
+Zalo, VNG Corporation, or any of their affiliates. "Zalo" is their trademark, used here only
+to say which service this talks to.
+
+It calls the public [Zalo Bot API](https://bot.zapps.me/docs/) the same way any third-party
+bot does. Your bot, your token, your account, your responsibility: read Zalo's own terms
+before pointing this at anything that matters, and expect the API to change without warning.
+
+It is published under the MIT license, which means it comes with no warranty and no
+liability. If something breaks in your setup, you own the breakage.
+
 ## License
 
 MIT
