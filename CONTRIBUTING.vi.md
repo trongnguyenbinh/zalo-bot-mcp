@@ -2,26 +2,26 @@
 
 # Đóng góp
 
-Dự án một người làm, nên ở đây ít thủ tục. Chỉ có hai thứ tôi nói kỹ: cái gate chặn truy
-cập, và chuyện đừng để lộ token bot.
+Dự án cá nhân, một người maintain. Ít thủ tục. Có hai thứ được quy định chặt: gate kiểm soát
+truy cập, và việc không để lộ token bot.
 
-## Đọc trước khi bắt tay
+## Trước khi bắt đầu
 
-- Code bạn gửi đi theo [giấy phép MIT](LICENSE) như phần còn lại của dự án. Không CLA, không
-  bắt ký sign-off.
-- **Tìm ra lỗ hổng bảo mật thì đừng mở issue, cũng đừng mở PR.** Báo riêng, cách làm ở
-  [SECURITY.md](SECURITY.md). Một PR công khai vá lỗ vượt gate cũng là công khai luôn cách
-  vượt gate, trong khi máy người dùng vẫn đang chạy bản cũ.
-- **Đừng dán token bot, chat ID thật, hay log chưa che** vào issue, PR, file test hay ảnh
-  chụp màn hình. Token có nằm trong log của poller. Soi lại trước khi đăng.
-- Ăn nói tử tế với nhau. Tôi không viết code of conduct vì một mình tôi không xử lý nổi thủ
-  tục khiếu nại. Ai làm chỗ này khó chịu thì tôi chặn, vậy thôi.
-- Mới vào dự án thì đọc [docs/getting-started.vi.md](docs/getting-started.vi.md) trước
-  (English: [docs/getting-started.md](docs/getting-started.md)), nhanh hơn đọc code.
+- Code đóng góp theo [giấy phép MIT](LICENSE), giống phần còn lại của dự án. Không yêu cầu
+  CLA, không yêu cầu sign-off.
+- **Tìm ra lỗ hổng bảo mật thì không mở issue, không mở PR.** Báo riêng theo
+  [SECURITY.md](SECURITY.md). PR công khai vá lỗ vượt gate cũng công khai luôn cách vượt
+  gate, trong khi các bản đang chạy chưa kịp update.
+- **Không dán token bot, chat ID thật, hoặc log chưa che** vào issue, PR, file test hay ảnh
+  chụp màn hình. Token có xuất hiện trong log của poller.
+- Không có code of conduct, vì một người không xử lý nổi quy trình khiếu nại. Ai gây khó
+  chịu thì bị chặn.
+- Chưa quen dự án thì đọc [docs/getting-started.vi.md](docs/getting-started.vi.md) trước
+  (English: [docs/getting-started.md](docs/getting-started.md)). Nhanh hơn đọc code.
 
-## Dựng môi trường
+## Môi trường dev
 
-Cần Python 3.10 trở lên. Không database, không Docker, không phải bật service nào.
+Cần Python 3.10 trở lên. Không database, không Docker, không service nào phải bật.
 
 ```bash
 git clone https://github.com/trongnguyenbinh/zalo-bot-mcp.git
@@ -37,57 +37,52 @@ ruff check .
 pytest -q
 ```
 
-Cả bộ test chạy chưa tới một giây. Không cần mạng, không cần token, không cần tài khoản Zalo,
-vì phần gọi API đã mock hết. Test nào bắt buộc phải có bot thật mới chạy được thì đừng để
-trong `tests/`, ghi vào mô tả PR như một bước kiểm tay.
+Bộ test chạy dưới một giây. Không cần mạng, không cần token, không cần tài khoản Zalo, vì
+phần gọi API đã mock. Test nào bắt buộc phải có bot thật thì không để trong `tests/`, ghi
+vào mô tả PR như một bước kiểm tay.
 
-CI chạy đúng hai lệnh trên, trên Python 3.10 và 3.14, xem
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml). Máy bạn xanh thì CI cũng xanh.
+CI chạy đúng hai lệnh trên, trên Python 3.10 và 3.14. Xem
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml). Máy bạn xanh thì CI xanh.
 
-Một lưu ý: **`ruff format` chưa bật.** Ba file hiện tại chưa đúng format. Format lại chúng
-trong một PR không liên quan sẽ biến sửa năm dòng thành cái diff không ai soi nổi. Cứ viết
-theo style của code xung quanh, chạy `ruff check .`, và đừng động vào `ruff format` trừ khi
-PR của bạn đúng là để làm việc đó.
+**`ruff format` chưa bật.** Ba file hiện tại chưa đúng format. Format lại chúng trong một PR
+không liên quan sẽ làm diff phình to, khó review. Viết theo style code xung quanh, chạy
+`ruff check .`, và không động vào `ruff format` trừ khi PR đúng là để format.
 
 ## Quy trình
 
-1. **Việc không nhỏ thì mở issue hỏi trước.** Sửa bug, sửa chính tả, sửa docs, thêm test thì
-   cứ gửi PR thẳng. Còn thêm tool mới, thêm khoá config, đổi cách quyết định ai được vào thì
-   nói với tôi trước. Tôi nói "hướng này không đi" trong một comment vẫn hơn nói sau khi bạn
-   đã đổ cả cuối tuần vào đó.
-2. **Tách nhánh từ `main`.** Đặt tên gọn, kiểu `fix/dedupe-on-restart`. Bạn làm trên fork của
-   mình, vì `main` ở đây chặn push thẳng và chặn force-push.
-3. **Một PR một thay đổi.** Hai chỗ sửa không liên quan thì tách hai PR. Không phải tôi làm
-   khó. Tôi review buổi tối, diff gọn thì tối nay merge, diff to thì có khi ba tuần nữa.
-4. **Sửa gì cũng phải có test.** Thêm hành vi mới thì thêm test. Sửa bug thì cần một test
-   hỏng trước khi sửa và xanh sau khi sửa. Điều này tôi không nhân nhượng, vì bộ test là thứ
-   duy nhất chặn giữa một lần refactor và một con bot lặng lẽ ngừng trả lời.
-5. **Chạy `ruff check .` với `pytest -q` trước khi push.**
-6. **Mở PR vào `main`**, ghi rõ nếu thay đổi này sai thì cái gì hỏng. CI xanh tôi mới merge.
+1. **Việc lớn thì mở issue trước.** Sửa bug, sửa chính tả, sửa docs, thêm test: gửi PR
+   thẳng. Thêm tool, thêm khoá config, đổi cách quyết định ai được vào: trao đổi trước.
+2. **Tách nhánh từ `main`.** Tên ngắn gọn, ví dụ `fix/dedupe-on-restart`. Bạn làm trên fork,
+   vì `main` chặn push thẳng và chặn force-push.
+3. **Một PR một thay đổi.** Hai chỗ sửa không liên quan thì tách hai PR. Diff gọn thì review
+   nhanh, diff to thì chờ lâu.
+4. **Thay đổi nào cũng kèm test.** Thêm hành vi mới thì thêm test. Sửa bug thì cần test hỏng
+   trước khi sửa, xanh sau khi sửa. Đây là quy tắc không nhân nhượng: bộ test là thứ duy
+   nhất phát hiện một lần refactor làm bot ngừng trả lời.
+5. **Chạy `ruff check .` và `pytest -q` trước khi push.**
+6. **Mở PR vào `main`**, ghi rõ thay đổi này sai thì cái gì hỏng. CI xanh mới merge.
 
 ## PR đụng vào gate
 
 `src/zalo_bot_mcp/gate.py` và `src/zalo_bot_mcp/access.py` quyết định tin nhắn của ai được
-vào tới một session đọc được file và chạy được lệnh trên máy người ta. Sai ở đây không phải
-một cái bug, mà là cửa không khoá trên mọi máy đang cài.
+vào một session đọc được file và chạy được lệnh trên máy người dùng. Sai ở đây ảnh hưởng mọi
+bản đang cài.
 
-PR của bạn động vào hai file đó, hoặc động vào cấu trúc file config truy cập, thì:
+PR đụng vào hai file đó, hoặc đụng vào cấu trúc file config truy cập, thì:
 
-- **Ghi rõ ngay ở tiêu đề PR hoặc dòng đầu mô tả.** Tôi cần biết trước khi bắt đầu đọc.
-- **Test cả nhánh TỪ CHỐI, đừng chỉ test nhánh cho qua.** "Người được duyệt thì vào được" là
-  nửa dễ. Nửa còn lại mới quan trọng: sau thay đổi này, người chưa duyệt vẫn phải bị chặn.
-- **Đừng nới mặc định cho rộng ra.** Thay đổi làm một thứ vốn không với tới được thành với
-  tới được thì đó là quyết định thiết kế, phải mở issue bàn trước chứ không gửi PR luôn.
-- **Chuẩn bị tinh thần bị soi lâu.** Tôi sẽ đọc từng dòng và hỏi những câu nghe rất bắt bẻ.
-  Không phải nhắm vào bạn. Chỗ này mà sai thì người lãnh đủ là người dùng, mà họ có ngồi đây
-  đâu.
+- **Ghi rõ ở tiêu đề PR hoặc dòng đầu mô tả.**
+- **Test cả nhánh từ chối, không chỉ nhánh cho qua.** "Người được duyệt vào được" là phần
+  dễ. Phần cần test là: sau thay đổi này, người chưa duyệt vẫn bị chặn.
+- **Không nới mặc định.** Thay đổi làm một thứ vốn không với tới được thành với tới được là
+  quyết định thiết kế, cần mở issue bàn trước.
+- **Review sẽ lâu.** Đọc từng dòng và hỏi kỹ. Sai ở vùng này thì người chịu là người dùng.
 
-Threat model, và ranh giới giữa "lỗ hổng" với "thiết kế nó vậy", nằm trong
-[SECURITY.md](SECURITY.md#what-counts). Đọc trước khi đề xuất sửa ở vùng này.
+Threat model, và ranh giới giữa lỗ hổng với thiết kế có chủ đích, ở
+[SECURITY.md](SECURITY.md#what-counts). Đọc trước khi đề xuất sửa vùng này.
 
 ## Commit và tiêu đề PR
 
-Commit viết dạng `type: tóm tắt ngắn`, động từ để nguyên thể:
+Commit theo dạng `type: tóm tắt ngắn`, động từ nguyên thể:
 
 ```
 fix: drop duplicate updates after a poller restart
@@ -96,59 +91,53 @@ docs: document the group mention requirement
 
 Các type đang dùng: `feat`, `fix`, `docs`, `test`, `refactor`, `ci`, `chore`.
 
-**Đây là quy ước, không phải check tự động.** CI không đọc commit message, cũng không tool
-nào tính version từ đó. Sẽ không có PR nào bị từ chối vì một dòng tiêu đề. Làm theo cho lịch
-sử commit dễ đọc thôi.
+**Đây là quy ước, không phải check tự động.** CI không đọc commit message, không tool nào
+tính version từ đó. Không PR nào bị từ chối vì tiêu đề commit. Làm theo để lịch sử commit dễ
+đọc.
 
-**Tiêu đề PR thì khác, cái đó máy đọc thật.** Release notes trên GitHub sinh ra từ tiêu đề
-các PR đã merge, nên tiêu đề bạn viết sẽ nằm nguyên si trong release notes công khai. Viết
-như một dòng changelog: nói cái gì đã đổi, đừng kể bạn đã làm gì.
+**Tiêu đề PR thì khác, cái này máy đọc.** Release notes trên GitHub sinh từ tiêu đề các PR
+đã merge, nên tiêu đề sẽ nằm nguyên trong release notes công khai. Viết như một dòng
+changelog: nói cái gì đã đổi.
 
 ## Phạm vi
 
-Server này làm đúng một việc: nối Zalo Bot API vào một MCP session, có cái gate đứng chắn ở
-giữa.
+Server này làm một việc: nối Zalo Bot API vào một MCP session, có gate ở giữa.
 
-Mấy thứ nằm ngoài phạm vi, gửi PR tôi sẽ đóng kèm link về đây:
+Ngoài phạm vi, PR sẽ bị đóng kèm link về đây:
 
-- **Nền tảng chat khác.** Telegram, Discord, Messenger. Đây là server cho Zalo. Muốn chạy đa
-  nền tảng thì phải thêm một lớp abstraction, mà chính lớp đó làm cái gate khó soát.
-- **Chạy bằng webhook.** Long polling là chủ ý, không phải giới hạn cần đi vòng: không cần
-  URL public, không cần tunnel, không mở cổng vào, cắm laptop sau NAT là chạy.
-- **Bất cứ thứ gì cho phép tin nhắn Zalo sửa được config truy cập.** Đây không phải tính năng
-  còn thiếu. Quyền chỉ cấp từ terminal của người vận hành, không từ đâu khác, cả thiết kế
-  chịu lực ở chỗ đó.
+- **Nền tảng chat khác.** Telegram, Discord, Messenger. Đây là server cho Zalo. Lớp
+  abstraction để chạy đa nền tảng cũng chính là thứ làm gate khó audit.
+- **Chạy bằng webhook.** Long polling là chủ ý: không cần URL public, không cần tunnel,
+  không mở cổng vào, chạy được sau NAT.
+- **Cho phép tin nhắn Zalo sửa config truy cập.** Đây không phải tính năng còn thiếu. Quyền
+  chỉ cấp từ terminal của người vận hành.
 - **Hosting, multi-tenant, web dashboard, plugin system.**
 
-Mấy giới hạn do chính Zalo áp (tin tối đa 2000 ký tự, trong nhóm phải mention mới nghe, gửi
-rồi không sửa được, không có reaction, không có offset cursor) thì PR ở đây không sửa nổi.
-Danh sách đang có trong README.
+Giới hạn do Zalo áp (tin tối đa 2000 ký tự, trong nhóm phải mention, gửi rồi không sửa được,
+không có reaction, không có offset cursor) thì PR ở đây không sửa được. Danh sách ở README.
 
-Tôi đóng PR không có ý gì cá nhân đâu. Giấy phép MIT nên fork là một lựa chọn hoàn toàn hợp
-lý, và bạn dựng fork thì tôi dẫn link từ README sang.
+PR bị đóng không có ý gì cá nhân. Giấy phép MIT nên fork là lựa chọn hợp lý, và fork nào
+dùng được thì dẫn link từ README sang.
 
-## Bạn trông đợi gì được ở tôi
+## Bạn trông đợi gì được
 
-Tôi làm dự án này một mình, xen giữa công việc chính. Nên nói thẳng:
+Dự án này một người maintain, làm ngoài giờ công việc chính:
 
-- **Issue nào PR nào tôi cũng đọc.** Thường trong một tuần. Đôi khi trễ.
-- **Tôi không hứa hạn chót review.** Hứa 24 giờ rồi trễ còn tệ hơn không hứa, vì bạn cứ ngồi
-  bấm tải lại thay vì đi làm việc khác.
-- **Báo lỗi bảo mật được ưu tiên trước hết**, theo mốc trong [SECURITY.md](SECURITY.md), phản
+- **Issue và PR đều được đọc.** Thường trong một tuần, đôi khi lâu hơn.
+- **Không hứa hạn chót review.** Hứa 24 giờ rồi trễ còn tệ hơn không hứa.
+- **Báo lỗi bảo mật được ưu tiên trước**, theo mốc trong [SECURITY.md](SECURITY.md): phản
   hồi trong 7 ngày.
-- **PR nhỏ gọn có test thì merge nhanh nhất**, nhanh hơn hẳn. Sửa 20 dòng kèm test là mười
-  phút review xong. Refactor 400 dòng không test có thể nằm đó cả tháng rồi bị đóng, mà cái
-  đó phí thời gian của bạn hơn của tôi.
-- **PR im hơn hai tuần thì cứ nhắc tôi.** Không phải tôi lơ bạn, nó trôi khỏi trang thôi.
-  Nhắc là chuyện nên làm, không có gì bất lịch sự.
-- **Đây mới là bản 0.x.** Tên tool, cấu trúc file config, flag CLI đều có thể đổi giữa các
-  bản minor. Xây gì lên trên thì nhớ pin version.
+- **PR nhỏ, có test, tập trung thì merge nhanh nhất.** Sửa 20 dòng kèm test là mười phút
+  review. Refactor 400 dòng không test có thể nằm cả tháng rồi bị đóng.
+- **PR im quá hai tuần thì nhắc.** Nhắc là bình thường, không phiền.
+- **Đây là bản 0.x.** Tên tool, cấu trúc file config, flag CLI đều có thể đổi giữa các bản
+  minor. Xây gì lên trên thì pin version.
 
-## Hỏi han
+## Hỏi đáp
 
-Hỏi gì, góp ý gì, hay thắc mắc kiểu "cái này chạy vậy là đúng hay sai" thì vào
-[Discussions](https://github.com/trongnguyenbinh/zalo-bot-mcp/discussions). Issues để dành
-cho thứ đang hỏng, hỏi ở đó rồi cũng bị chuyển sang.
+Câu hỏi, đề xuất, hoặc thắc mắc kiểu "cái này chạy vậy là đúng hay sai" thì vào
+[Discussions](https://github.com/trongnguyenbinh/zalo-bot-mcp/discussions). Issues dành cho
+thứ đang hỏng, hỏi ở đó sẽ bị chuyển sang.
 
-Xem [docs/getting-started.vi.md](docs/getting-started.vi.md) trước đã: trục trặc lúc cài gần
-như lúc nào cũng là thiếu flag channel, hoặc con bot chưa từng được mention trong nhóm.
+Xem [docs/getting-started.vi.md](docs/getting-started.vi.md) trước: lỗi lúc cài gần như
+luôn là thiếu flag channel, hoặc bot chưa từng được mention trong nhóm.
