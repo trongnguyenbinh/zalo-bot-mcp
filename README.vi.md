@@ -16,8 +16,8 @@ MCP channel server cho [Zalo Bot API](https://bot.zapps.me/docs/). Ai nhắn cho
 bạn thì tin đó vào thẳng session MCP đang chạy, và session trả lời ngược lại bằng một tool
 call.
 
-> **Dự án còn mới.** Server chạy được, đã dùng thật với bot thật, nhưng chưa lên PyPI. MCP
-> channel mà nó bám vào cũng vẫn là tính năng thử nghiệm của Claude Code.
+> **Dự án còn mới.** Bản 0.1.0 đã lên PyPI, server chạy thật với bot thật rồi, nhưng MCP
+> channel mà nó bám vào vẫn là tính năng thử nghiệm của Claude Code.
 
 ## Nó chạy thế nào
 

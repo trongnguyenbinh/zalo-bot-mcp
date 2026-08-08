@@ -15,8 +15,8 @@
 An MCP channel server for the [Zalo Bot API](https://bot.zapps.me/docs/). Messages sent to
 your Zalo bot arrive in an MCP client session; the session replies through a tool call.
 
-> **Early.** The server runs and has been exercised against a real bot, but it is not on
-> PyPI yet and the MCP channel it targets is an experimental Claude Code capability.
+> **Early.** Version 0.1.0 is on PyPI and the server has been exercised against a real bot,
+> but the MCP channel it targets is still an experimental Claude Code capability.
 
 ## How it works
 
