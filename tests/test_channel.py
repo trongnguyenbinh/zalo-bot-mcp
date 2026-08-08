@@ -247,3 +247,17 @@ async def test_status_counts_and_known_chats():
     status = channel.status()
     assert status["processed"] == 2
     assert status["known_chats"] == ["c1", "c2"]
+
+
+def test_instructions_list_the_real_skill_names():
+    """The model was inventing /zalo-allow because nothing told it the real
+    names. Every skill on disk must appear, spelled with the colon."""
+    from pathlib import Path
+
+    from zalo_bot_mcp.channel import INSTRUCTIONS
+
+    skills = sorted(p.name for p in (Path(__file__).parent.parent / "skills").iterdir() if p.is_dir())
+    assert skills, "no skills found; this test would pass vacuously"
+    for name in skills:
+        assert f"/zalo:{name}" in INSTRUCTIONS, f"/zalo:{name} missing from INSTRUCTIONS"
+    assert "/zalo-" not in INSTRUCTIONS, "hyphen form would teach the wrong name"
