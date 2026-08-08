@@ -92,6 +92,26 @@ message, plus all `/zalo:*` skills and the `zalo-bot-mcp-admin` CLI, lives in
 **[docs/getting-started.md](docs/getting-started.md)**
 (bản tiếng Việt: [docs/getting-started.vi.md](docs/getting-started.vi.md)).
 
+### About that channel flag
+
+The flag is `--dangerously-load-development-channels`, and the word in the
+middle is not decoration. Claude Code's plain `--channels` flag only accepts
+plugins on an approved-channels allowlist that ships inside Claude Code, and
+rejects raw `server:` entries outright. zalo is not on that allowlist, so the
+development flag is the only way to run this today.
+
+Anthropic's own wording is that the flag is for local channel development and
+not for running channels you downloaded off the internet. You would be
+downloading this one off the internet. That is worth saying out loud rather
+than burying: you are handing a messaging app a path into a session that can
+read your files and run commands, using an escape hatch built for people
+debugging their own code.
+
+The mitigations are the gate, the fact that no Zalo message can change who is
+allowed through, and that every line of both is in this repo. Read
+[`src/zalo_bot_mcp/gate.py`](src/zalo_bot_mcp/gate.py) and
+[SECURITY.md](SECURITY.md) before you decide, not after.
+
 ## Development
 
 ```bash

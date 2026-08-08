@@ -89,6 +89,23 @@ Hướng dẫn đầy đủ, từ lúc tạo bot cho tới tin trả lời đầ
 và CLI `zalo-bot-mcp-admin`, nằm ở **[docs/getting-started.vi.md](docs/getting-started.vi.md)**
 (English: [docs/getting-started.md](docs/getting-started.md)).
 
+### Nói rõ về cái flag channel
+
+Flag đó tên là `--dangerously-load-development-channels`, và chữ ở giữa không phải để trang
+trí. Flag `--channels` thường của Claude Code chỉ nhận plugin nằm trong allowlist nhúng sẵn
+bên trong Claude Code, còn entry `server:` thì từ chối thẳng. zalo không có trong allowlist
+đó, nên hiện tại flag development là đường duy nhất chạy được.
+
+Nguyên văn Anthropic ghi flag này dành cho việc phát triển channel ở máy mình, không dành
+cho channel tải từ internet về. Mà cái này thì đúng là tải từ internet về. Nói thẳng ra vẫn
+hơn giấu: bạn đang mở cho một app nhắn tin một đường vào session đọc được file và chạy được
+lệnh trên máy bạn, bằng một cửa hậu vốn làm ra cho người đang debug code của chính họ.
+
+Cái đỡ lại là gate, là việc không tin nhắn Zalo nào sửa được danh sách ai được vào, và là
+toàn bộ code của hai thứ đó nằm trong repo này. Đọc
+[`src/zalo_bot_mcp/gate.py`](src/zalo_bot_mcp/gate.py) và [SECURITY.md](SECURITY.md) trước
+khi quyết, đừng đọc sau.
+
 ## Chạy thử khi phát triển
 
 ```bash
