@@ -84,20 +84,33 @@ an experimental Claude Code capability, and they are off by default. Without
 the flag the MCP server connects, the `reply` tool exists, but incoming Zalo
 messages never reach your session.
 
+The entry you pass depends on which path you installed. Path A registered a
+plugin; path B registered a plain MCP server, and the resolver looks them up
+in different places:
+
 ```bash
+# Path A, installed as a plugin
+claude --dangerously-load-development-channels plugin:zalo@zalo-bot-mcp
+
+# Path B, declared in .mcp.json
 claude --dangerously-load-development-channels server:zalo
 ```
 
-Two details that matter:
+Three details that matter:
 
-- The `server:` prefix is required. `--dangerously-load-development-channels
-  zalo` will not resolve.
-- Run it from a directory whose `.mcp.json` declares the `zalo` server (path
-  B), or with the plugin installed (path A). The channel resolver has to find
-  a server by that name.
+- The prefix is required. A bare `zalo` will not resolve either way.
+- Path B only resolves from a directory whose `.mcp.json` declares the server.
+  Claude Code looks for `server:` names in the enterprise, user, project, and
+  local scopes; a plugin's server is not in any of them, which is why path A
+  needs the `plugin:` form.
+- **`--dangerously-load-development-channels`, not `--channels`.** The plain
+  `--channels` flag only accepts plugins on an approved-channels allowlist
+  that ships inside Claude Code, and it never accepts `server:` entries at
+  all. zalo is not on that allowlist, so the development flag is the only way
+  to run it today.
 
 Claude Code shows a confirmation prompt about development channels, then a
-banner saying messages from `server:zalo` inject into the session. Message
+banner saying messages from the channel inject into the session. Message
 your bot on Zalo: the first DM gets a pairing code, and after you approve it
 (`/zalo:approve <code>`) your messages start arriving in the session.
 

@@ -80,19 +80,32 @@ tên bot ra. Cách khác: đặt biến môi trường `ZALO_BOT_TOKEN`.
 nghiệm của Claude Code, mặc định tắt. Không có flag thì MCP server vẫn kết
 nối được, tool `reply` vẫn có, nhưng tin nhắn Zalo không bao giờ vào session.
 
+Gõ entry nào là tuỳ bạn cài theo đường nào. Đường A đăng ký một plugin, đường
+B đăng ký một MCP server thường, và Claude Code tra hai thứ đó ở hai chỗ khác
+nhau:
+
 ```bash
+# Đường A, cài dạng plugin
+claude --dangerously-load-development-channels plugin:zalo@zalo-bot-mcp
+
+# Đường B, khai trong .mcp.json
 claude --dangerously-load-development-channels server:zalo
 ```
 
-Hai chi tiết quan trọng:
+Ba chi tiết quan trọng:
 
-- Bắt buộc có prefix `server:`. Viết
-  `--dangerously-load-development-channels zalo` là không nhận.
-- Chạy trong thư mục có `.mcp.json` khai server `zalo` (đường B), hoặc đã cài
-  plugin (đường A). Claude Code phải tìm ra một server đúng tên đó thì mới nối được channel.
+- Bắt buộc có prefix. Gõ trống trơn `zalo` là không nhận, đường nào cũng vậy.
+- Đường B chỉ chạy khi bạn đứng trong thư mục có `.mcp.json` khai server đó.
+  Claude Code tìm tên `server:` trong scope enterprise, user, project, local,
+  mà server của một plugin không nằm trong scope nào trong bốn cái đó, nên
+  đường A phải dùng dạng `plugin:`.
+- **Là `--dangerously-load-development-channels`, không phải `--channels`.**
+  Flag `--channels` chỉ nhận plugin nằm trong allowlist mà Claude Code nhúng
+  sẵn, và không nhận entry `server:` trong mọi trường hợp. zalo không có trong
+  allowlist đó, nên hiện tại flag development là đường duy nhất.
 
 Claude Code sẽ hỏi xác nhận về development channels, rồi hiện banner báo tin
-nhắn từ `server:zalo` sẽ vào thẳng session. Nhắn thử cho bot trên Zalo: tin DM
+nhắn từ channel sẽ vào thẳng session. Nhắn thử cho bot trên Zalo: tin DM
 đầu tiên nhận được mã pairing, bạn duyệt mã (`/zalo:approve <mã>`) xong thì
 tin bắt đầu vào session.
 
