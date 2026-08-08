@@ -7,8 +7,9 @@
 </p>
 
 <p align="center">
+  <a href="https://pypi.org/project/zalo-bot-mcp/"><img src="https://img.shields.io/pypi/v/zalo-bot-mcp.svg" alt="PyPI"></a>
+  <a href="https://pypi.org/project/zalo-bot-mcp/"><img src="https://img.shields.io/pypi/pyversions/zalo-bot-mcp.svg" alt="Python versions"></a>
   <a href="#giấy-phép"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
-  <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/status-early%20development-orange.svg" alt="Đang phát triển">
 </p>
 
@@ -16,8 +17,8 @@ MCP channel server cho [Zalo Bot API](https://bot.zapps.me/docs/). Ai nhắn cho
 bạn thì tin đó vào thẳng session MCP đang chạy, và session trả lời ngược lại bằng một tool
 call.
 
-> **Dự án còn mới.** Bản 0.1.0 đã lên PyPI, server chạy thật với bot thật rồi, nhưng MCP
-> channel mà nó bám vào vẫn là tính năng thử nghiệm của Claude Code.
+> **Dự án còn mới.** Đã lên PyPI, server chạy thật với bot thật rồi, nhưng MCP channel mà
+> nó bám vào vẫn là tính năng thử nghiệm của Claude Code.
 
 ## Nó chạy thế nào
 

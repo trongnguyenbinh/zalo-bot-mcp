@@ -40,7 +40,7 @@ ruff check .
 pytest -q
 ```
 
-The suite is 144 tests and finishes in under a second. It needs no network, no token, and
+The suite finishes in under a second. It needs no network, no token, and
 no Zalo account: the API client is exercised against fakes. If a test of yours needs a live
 bot to pass, it belongs in a manual note in the PR description, not in `tests/`.
 

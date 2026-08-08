@@ -37,7 +37,7 @@ ruff check .
 pytest -q
 ```
 
-144 test, chạy chưa tới một giây. Không cần mạng, không cần token, không cần tài khoản Zalo,
+Cả bộ test chạy chưa tới một giây. Không cần mạng, không cần token, không cần tài khoản Zalo,
 vì phần gọi API đã mock hết. Test nào bắt buộc phải có bot thật mới chạy được thì đừng để
 trong `tests/`, ghi vào mô tả PR như một bước kiểm tay.
 

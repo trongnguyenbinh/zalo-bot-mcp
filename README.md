@@ -7,16 +7,17 @@
 </p>
 
 <p align="center">
+  <a href="https://pypi.org/project/zalo-bot-mcp/"><img src="https://img.shields.io/pypi/v/zalo-bot-mcp.svg" alt="PyPI"></a>
+  <a href="https://pypi.org/project/zalo-bot-mcp/"><img src="https://img.shields.io/pypi/pyversions/zalo-bot-mcp.svg" alt="Python versions"></a>
   <a href="#license"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"></a>
-  <img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python 3.10+">
   <img src="https://img.shields.io/badge/status-early%20development-orange.svg" alt="Early development">
 </p>
 
 An MCP channel server for the [Zalo Bot API](https://bot.zapps.me/docs/). Messages sent to
 your Zalo bot arrive in an MCP client session; the session replies through a tool call.
 
-> **Early.** Version 0.1.0 is on PyPI and the server has been exercised against a real bot,
-> but the MCP channel it targets is still an experimental Claude Code capability.
+> **Early.** The server is on PyPI and has been exercised against a real bot, but the MCP
+> channel it targets is still an experimental Claude Code capability.
 
 ## How it works
 

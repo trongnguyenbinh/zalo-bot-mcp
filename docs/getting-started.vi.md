@@ -48,7 +48,11 @@ là lý do skill này không nhận token gõ tay.
 
 ### Đường B: gói Python
 
-Chưa lên PyPI, cài từ source:
+```bash
+uv tool install zalo-bot-mcp
+```
+
+Hoặc cài từ source, nếu muốn lấy commit chưa release:
 
 ```bash
 uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp

@@ -50,7 +50,11 @@ argument, which is why the skill refuses to take the token as text.
 
 ### Path B: Python package
 
-Not on PyPI yet; install from source:
+```bash
+uv tool install zalo-bot-mcp
+```
+
+Or from source, if you want an unreleased commit:
 
 ```bash
 uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp
