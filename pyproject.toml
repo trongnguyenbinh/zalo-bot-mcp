@@ -1,11 +1,25 @@
 [project]
 name = "zalo-bot-mcp"
 version = "0.1.0"
-description = "MCP channel server for Zalo Bot API — bridges Zalo messages into an MCP client session"
+description = "MCP channel server for the Zalo Bot API. Bridges Zalo messages into an MCP client session."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "trongnguyenbinh" }]
 keywords = ["zalo", "mcp", "chatbot", "channel"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Communications :: Chat",
+]
 
 dependencies = [
     "httpx>=0.27,<0.29",
@@ -19,6 +33,11 @@ dev = [
     "ruff>=0.6",
 ]
 
+[project.urls]
+Homepage = "https://github.com/trongnguyenbinh/zalo-bot-mcp"
+Repository = "https://github.com/trongnguyenbinh/zalo-bot-mcp"
+Issues = "https://github.com/trongnguyenbinh/zalo-bot-mcp/issues"
+
 [project.scripts]
 zalo-bot-mcp = "zalo_bot_mcp.main:run"
 zalo-bot-mcp-admin = "zalo_bot_mcp.admin:main"
@@ -29,6 +48,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zalo_bot_mcp"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [".claude/settings.local.json"]
 
 [tool.ruff]
 line-length = 100

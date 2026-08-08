@@ -1,0 +1,12 @@
+{
+  "name": "zalo-bot-mcp",
+  "description": "Zalo channel plugin for Claude Code",
+  "owner": { "name": "trongnguyenbinh" },
+  "plugins": [
+    {
+      "name": "zalo",
+      "source": "./",
+      "description": "Zalo channel for Claude Code. Messaging bridge with built-in access control: manage pairing, allowlists, and group grants via /zalo:* skills."
+    }
+  ]
+}

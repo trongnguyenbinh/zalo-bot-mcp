@@ -17,6 +17,7 @@ from zalo_bot_mcp.zalo_api import (
     ZaloTransientError,
     parse_update,
     split_message,
+    to_zalo_markdown,
 )
 
 TOKEN = "1234567890:SECRET-token-do-not-log"
@@ -86,6 +87,83 @@ async def test_send_message_includes_parse_mode_when_set():
         await api.send_message("chat-1", "*bold*", parse_mode="markdown")
 
     assert seen["body"]["parse_mode"] == "markdown"
+
+
+async def test_send_chat_action_path_and_body():
+    seen = {}
+
+    def handler(request):
+        seen["path"] = request.url.path
+        seen["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"ok": True})
+
+    async with make_api(handler) as api:
+        await api.send_chat_action("chat-1")
+
+    assert seen["path"] == f"/bot{TOKEN}/sendChatAction"
+    assert seen["body"] == {"chat_id": "chat-1", "action": "typing"}
+
+
+# --- to_zalo_markdown --------------------------------------------------------
+
+
+def test_code_block_stars_and_underscores_stay_literal():
+    """The reason this converter exists: *args and __init__ inside a fence
+    must not turn into italics/bold. Each code line gets inline-code wrapped,
+    which the docs promise preserves content."""
+    text = '```python\ndef greet(*args):\n    name = "__init__"\n```'
+    out = to_zalo_markdown(text)
+    assert "```" not in out
+    assert "`def greet(*args):`" in out
+    assert '`    name = "__init__"`' in out
+
+
+def test_code_block_inside_bold_prose_keeps_both_sides():
+    text = "Trước là **kết luận đậm**.\n\n```python\nx = a * b * c\n```\n\nSau là *nghiêng*."
+    out = to_zalo_markdown(text)
+    assert "**kết luận đậm**" in out
+    assert "*nghiêng*" in out
+    assert "```" not in out
+    assert "`x = a * b * c`" in out
+
+
+def test_code_line_containing_backtick_is_escaped_not_wrapped():
+    out = to_zalo_markdown("```bash\necho `date` x_y\n```")
+    assert "```" not in out
+    assert "\\`" in out
+    assert "x\\_y" in out
+    assert not out.startswith("`echo")
+
+
+def test_blank_code_lines_pass_through_bare():
+    out = to_zalo_markdown("```\na = 1\n\nb = 2\n```")
+    assert out == "`a = 1`\n\n`b = 2`"
+
+
+def test_unclosed_fence_treats_rest_as_code():
+    out = to_zalo_markdown("intro\n```\nx = *p\ny = 2")
+    assert out == "intro\n`x = *p`\n`y = 2`"
+
+
+def test_links_unwrap_to_text_and_url():
+    out = to_zalo_markdown("Xem [tài liệu](https://bot.zapps.me/docs/) nhé")
+    assert out == "Xem tài liệu (https://bot.zapps.me/docs/) nhé"
+
+
+def test_link_inside_inline_code_is_left_alone():
+    out = to_zalo_markdown("dùng `[a](b)` nguyên văn")
+    assert out == "dùng `[a](b)` nguyên văn"
+
+
+def test_heading_five_plus_demoted_to_four():
+    assert to_zalo_markdown("##### Title") == "#### Title"
+    assert to_zalo_markdown("###### Deep") == "#### Deep"
+    assert to_zalo_markdown("#### Keep") == "#### Keep"
+
+
+def test_plain_prose_untouched():
+    text = "Chào **anh**, đây là *ghi chú* với `inline code` và ~~gạch~~."
+    assert to_zalo_markdown(text) == text
 
 
 async def test_get_me():

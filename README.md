@@ -13,8 +13,8 @@
 An MCP channel server for the [Zalo Bot API](https://bot.zapps.me/docs/). Messages sent to
 your Zalo bot arrive in an MCP client session; the session replies through a tool call.
 
-> **Not usable yet.** The design is settled and the packaging is in place. The code is not
-> written. Watch the repo if you want to know when it runs.
+> **Early.** The server runs and has been exercised against a real bot, but it is not on
+> PyPI yet and the MCP channel it targets is an experimental Claude Code capability.
 
 ## How it works
 
@@ -59,7 +59,9 @@ anything.
 
 ## Zalo platform constraints
 
-These come from the Zalo Bot API itself, and they shape what any Zalo bot can do:
+These come from the Zalo Bot API itself, and they shape what any Zalo bot can do. Zalo owns
+these rules and changes them without notice, so treat <https://bot.zapps.me/> as the source
+of truth and this section as a summary that may be out of date:
 
 - **Groups are mention-gated.** A bot receives a group message only when it is mentioned or
   when someone replies to one of its messages. It cannot watch a conversation passively.
@@ -68,11 +70,42 @@ These come from the Zalo Bot API itself, and they shape what any Zalo bot can do
   `message_id` rather than by advancing a cursor.
 - **No message editing.** Replies cannot be updated in place, so progress on a long task
   arrives as new messages.
-- **Beta limits.** One bot joins at most 3 groups, each capped at 50 members.
+- **No reactions.** The API has no reaction endpoint, so a bot cannot acknowledge a message
+  with an emoji. It can send a typing indicator (`sendChatAction`) and stickers.
+- **Free-plan quotas.** Zalo's Basic (free) plan allows 3 bots per account, 50 users per bot,
+  3 group chats (marked beta), and 3,000 outbound messages per month. A paid Pro plan exists.
+  Current plans and quotas: <https://bot.zapps.me/>.
 
 ## Install
 
-Not published yet.
+Both paths need [uv](https://docs.astral.sh/uv/) on the machine.
+
+### As a Claude Code plugin
+
+```
+/plugin marketplace add trongnguyenbinh/zalo-bot-mcp
+/plugin install zalo@zalo-bot-mcp
+```
+
+The plugin starts the server for you and adds the `/zalo:*` skills: `set-token`,
+`pending-chats`, `approve`, `allow`, `revoke`, `list`, `group-add`, `group-remove`.
+Start with `/zalo:set-token` to install your bot token from the clipboard.
+
+### As a Python package
+
+Not on PyPI yet. Until then, install from source:
+
+```bash
+uv tool install git+https://github.com/trongnguyenbinh/zalo-bot-mcp
+```
+
+Then register the server in your project's `.mcp.json`:
+
+```json
+{ "mcpServers": { "zalo": { "command": "zalo-bot-mcp" } } }
+```
+
+The `zalo-bot-mcp-admin` CLI manages tokens and access from the terminal.
 
 ## Development
 

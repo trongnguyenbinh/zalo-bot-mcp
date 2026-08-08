@@ -22,7 +22,14 @@ from mcp import types
 from mcp.server.lowlevel import Server
 
 from . import __version__
-from .zalo_api import InboundMessage, ZaloBotApi, split_message
+from .zalo_api import (
+    InboundMessage,
+    ZaloApiError,
+    ZaloBotApi,
+    ZaloClientError,
+    split_message,
+    to_zalo_markdown,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +63,8 @@ _TOOLS = [
         description=(
             "Send a text message to a Zalo chat. Only chats that have already"
             " messaged this session are accepted. Long text is split into"
-            " 2000-character messages automatically."
+            " 2000-character messages automatically. Markdown (bold, italic,"
+            " code, headings, lists) is rendered."
         ),
         inputSchema={
             "type": "object",
@@ -98,6 +106,12 @@ class ZaloChannel:
     async def push_inbound(self, msg: InboundMessage) -> None:
         """Forward a gate-approved message to the Claude session. Also
         registers the chat as a valid reply target."""
+        # Best-effort typing indicator, sent once per inbound message. Purely
+        # cosmetic: a failure here must never cost the actual notification.
+        try:
+            await self._api.send_chat_action(msg.chat_id, "typing")
+        except ZaloApiError as exc:
+            logger.debug("sendChatAction failed (ignored): %s", exc)
         self._known_chats.add(msg.chat_id)
         params = {
             "content": msg.text,
@@ -134,11 +148,21 @@ class ZaloChannel:
                 f"chat_id {chat_id!r} has never messaged this session; refusing to send."
                 " Only reply to chats that appear in <channel> notifications."
             )
-        pieces = split_message(text)
+        pieces = split_message(to_zalo_markdown(text))
         if not pieces:
             raise ValueError("reply text is empty")
         for piece in pieces:
-            await self._api.send_message(chat_id, piece)
+            # Markdown first so **bold** and `code` render. If Zalo rejects
+            # the formatted message, resend the same text plain: losing the
+            # formatting is fine, losing the message is not. Transient errors
+            # propagate, a retry would fail the same way in plain text.
+            try:
+                await self._api.send_message(chat_id, piece, parse_mode="markdown")
+            except ZaloClientError:
+                logger.warning(
+                    "markdown send rejected for chat %s; resending as plain text", chat_id
+                )
+                await self._api.send_message(chat_id, piece)
         return f"sent {len(pieces)} message(s) to {chat_id}"
 
     def note_poll(self) -> None:

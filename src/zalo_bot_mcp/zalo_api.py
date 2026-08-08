@@ -1,7 +1,7 @@
 """Thin async client for the Zalo Bot API.
 
-Knows nothing about MCP. Four calls: getUpdates, sendMessage, getMe,
-getWebhookInfo.
+Knows nothing about MCP. Five calls: getUpdates, sendMessage, getMe,
+getWebhookInfo, sendChatAction.
 
 Zalo puts the bot token in the URL path (``/bot<TOKEN>/getUpdates``), so any
 error message or log line that includes a URL leaks the token. Every string
@@ -13,6 +13,7 @@ contains the full URL) never appears in tracebacks.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -104,6 +105,58 @@ def split_message(text: str, limit: int = MAX_MESSAGE_LEN) -> list[str]:
     if rest:
         out.append(rest)
     return out
+
+
+_FENCE = re.compile(r"^\s*```")
+_LINK = re.compile(r"!?\[([^\]]*)\]\(([^)\s]+)\)")
+_INLINE_CODE = re.compile(r"`[^`\n]*`")
+_HEADING_5PLUS = re.compile(r"^(\s*)#{5,}\s*")
+# ponytail: escape only the markers we know Zalo un-escapes (docs show \* \_);
+# a wider set risks literal backslashes appearing wherever Zalo doesn't
+# recognise the escape.
+_CODE_ESCAPE = re.compile(r"([`*_])")
+
+
+def _convert_prose_line(line: str) -> str:
+    """Prose transforms, applied outside inline-code spans: demote #####+
+    headings to #### (Zalo stops at four) and unwrap [text](url) links,
+    which Zalo has no syntax for."""
+    line = _HEADING_5PLUS.sub(r"\1#### ", line)
+    parts: list[str] = []
+    last = 0
+    for m in _INLINE_CODE.finditer(line):
+        parts.append(_LINK.sub(r"\1 (\2)", line[last : m.start()]))
+        parts.append(m.group(0))
+        last = m.end()
+    parts.append(_LINK.sub(r"\1 (\2)", line[last:]))
+    return "".join(parts)
+
+
+def to_zalo_markdown(text: str) -> str:
+    """Rewrite common Markdown into the subset Zalo actually renders.
+
+    Zalo's markdown has no triple-backtick code block (measured: the fences
+    come out as literal backtick characters), but inline code preserves its
+    content. So fenced blocks are rewritten line by line: drop the fence
+    lines, wrap each code line in single backticks so ``*args`` and
+    ``__init__`` stay literal instead of turning into italics. Code lines
+    that themselves contain a backtick can't be wrapped; those get
+    backslash-escaping instead. Blank code lines pass through bare."""
+    out: list[str] = []
+    in_fence = False
+    for line in text.split("\n"):
+        if _FENCE.match(line):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            out.append(_convert_prose_line(line))
+        elif not line.strip():
+            out.append(line)
+        elif "`" in line:
+            out.append(_CODE_ESCAPE.sub(r"\\\1", line))
+        else:
+            out.append(f"`{line}`")
+    return "\n".join(out)
 
 
 class _TokenRedactingFilter(logging.Filter):
@@ -230,6 +283,11 @@ class ZaloBotApi:
         if parse_mode is not None:
             payload["parse_mode"] = parse_mode
         return await self._call("sendMessage", payload)
+
+    async def send_chat_action(self, chat_id: str, action: str = "typing") -> Any:
+        """Show a transient status indicator in the chat. Only "typing" is
+        live today; the docs list upload_photo as upcoming."""
+        return await self._call("sendChatAction", {"chat_id": chat_id, "action": action})
 
     async def get_me(self) -> Any:
         return await self._call("getMe", {})
