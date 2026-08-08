@@ -1,0 +1,43 @@
+name: Release (TestPyPI)
+
+# Manual only. A rehearsal of Release against test.pypi.org, so the first real
+# publish is not the first time this pipeline has ever run. TestPyPI is a
+# throwaway index: a bad upload there costs nothing, the same mistake on
+# pypi.org burns that version number permanently.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - run: python -m pip install -e ".[dev]" build
+      - run: ruff check .
+      - run: pytest -q
+      - run: python -m build
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-test
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write # Trusted Publishing; no API token stored anywhere
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist-test
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Tag, pyproject.toml và plugin.json phải cùng một phiên bản, lệch thì dừng ở đây
+      - name: Check version consistency
+        run: |
+          python - <<'EOF'
+          import json, os, sys, tomllib
+
+          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          proj = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
+          plugin = json.load(open(".claude-plugin/plugin.json"))["version"]
+          if not tag == proj == plugin:
+              sys.exit(f"version mismatch: tag={tag} pyproject={proj} plugin.json={plugin}")
+          print(f"version {tag} ok")
+          EOF
+
+      # CI fires on branch pushes and PRs only, so a tag can point at a commit
+      # that never ran the suite. Re-run it here: PyPI never lets a version
+      # number be reused, so a bad publish is permanent.
+      - run: python -m pip install -e ".[dev]" build
+      - run: ruff check .
+      - run: pytest -q
+
+      - run: python -m build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write # bắt buộc cho Trusted Publishing, không cần API token
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
