@@ -13,7 +13,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Tag, pyproject.toml và plugin.json phải cùng một phiên bản, lệch thì dừng ở đây
+      # The tag, pyproject.toml and plugin.json must agree on one version.
+      # Stop here if they do not.
       - name: Check version consistency
         run: |
           python - <<'EOF'
@@ -35,6 +36,31 @@ jobs:
       - run: pytest -q
 
       - run: python -m build
+
+      # Every gate above runs against the source tree; nothing has opened the
+      # wheel yet. Not even pytest: pyproject sets pythonpath = ["src"], so the
+      # suite imports straight from src rather than through an installed
+      # package, and the plugin path runs uvx --from <dir>, which never touches
+      # the wheel either. Installing into a clean venv is the only place a
+      # packaging bug shows up: a missing module, a broken entry point, a
+      # dependency that was never declared.
+      - name: Smoke test the built wheel
+        run: |
+          python -m venv /tmp/smoke-wheel
+          /tmp/smoke-wheel/bin/python -m pip install --disable-pip-version-check dist/*.whl
+          /tmp/smoke-wheel/bin/python -c "import zalo_bot_mcp"
+          /tmp/smoke-wheel/bin/zalo-bot-mcp-admin --help > /dev/null
+          test -x /tmp/smoke-wheel/bin/zalo-bot-mcp
+
+      # An sdist can quietly ship the wrong file set. Installing from it proves
+      # it still builds and that nothing was left out.
+      - name: Smoke test the sdist
+        run: |
+          python -m venv /tmp/smoke-sdist
+          /tmp/smoke-sdist/bin/python -m pip install --disable-pip-version-check dist/*.tar.gz
+          /tmp/smoke-sdist/bin/python -c "import zalo_bot_mcp"
+          /tmp/smoke-sdist/bin/zalo-bot-mcp-admin --help > /dev/null
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: dist
@@ -45,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write # bắt buộc cho Trusted Publishing, không cần API token
+      id-token: write # Trusted Publishing; no API token stored anywhere
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
